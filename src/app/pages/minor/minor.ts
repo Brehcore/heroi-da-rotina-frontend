@@ -10,6 +10,7 @@ import { TaskCreateDTO, TaskResponseDTO } from '../../core/services/models/task.
 import { TaskService } from '../tasks/task.service';
 import { WalletService } from '../wallet/wallet.service';
 import { extractErrorMessage } from '../tasks/error-handler.util';
+import { TransactionService } from '../wallet/transactions.service'
 
 export interface TransactionDTO {
   id: number;
@@ -34,6 +35,7 @@ export class Minor implements OnInit {
   private route = inject(ActivatedRoute);
   private platformId = inject(PLATFORM_ID);
   private cdr = inject(ChangeDetectorRef);
+  private transactionService = inject(TransactionService)
 
   minorId: string | null = null;
   minorName: string | null = null;
@@ -174,7 +176,7 @@ export class Minor implements OnInit {
 
     this.walletService.getWallet(Number(this.minorId)).subscribe({
       next: (data) => {
-        this.wallet = data;
+        this.wallet = data as any;
         this.loading = false;
         this.cdr.detectChanges();
       },
@@ -220,7 +222,7 @@ export class Minor implements OnInit {
   fetchTransactions(): void {
     if (!this.minorId) return;
 
-    this.walletService.getTransactions(Number(this.minorId)).subscribe({
+    this.transactionService.getTransactions(Number(this.minorId)).subscribe({
       next: (data) => {
         // O backend retorna as transações dentro da propriedade "content" de acordo com o JSON de exemplo
         this.transactions = data.content || [];

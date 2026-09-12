@@ -6,41 +6,75 @@
     </div>
   </header>
 
+  <!-- Banner de Notificação em Tempo Real (Info/Aprovado) -->
+  @if (statusNotice) {
+    <div class="alert-banner info">
+      <span class="icon">ℹ️</span>
+      <span>{{ statusNotice }}</span>
+      <button type="button" class="close-btn" (click)="statusNotice = null">&times;</button>
+    </div>
+  }
+
+  <!-- Banner de Erro ou Rejeição -->
   @if (errorMessage) {
     <div class="alert-banner error">
       <span class="icon">⚠️</span>
       <span>{{ errorMessage }}</span>
+      <button type="button" class="close-btn" (click)="errorMessage = null">&times;</button>
     </div>
   }
 
+  <!-- Card de Solicitação Ativa (Pendente ou Aprovada) -->
   @if (successResult) {
-    <div class="success-card">
-      <div class="badge-icon">🎉</div>
-      <h3>Solicitação Enviada!</h3>
-      <p>Seu pedido foi registrado e está pronto para uso ou aprovação.</p>
+    @let currentStatus = successResult.status || 'PENDING';
+
+    <div class="success-card" [attr.data-status]="currentStatus">
+      @if (currentStatus === 'APPROVED') {
+        <div class="badge-icon">🎉</div>
+        <h3>Tempo de Tela Aprovado!</h3>
+        <p>Seu responsável liberou seu tempo. Aproveite!</p>
+      } @else if (currentStatus === 'PENDING') {
+        <div class="badge-icon">⏳</div>
+        <h3>Aguardando Aprovação...</h3>
+        <p>Seu pedido foi enviado! Assim que o monitor responder, a tela atualizará automaticamente.</p>
+      } @else {
+        <div class="badge-icon">❌</div>
+        <h3>Solicitação Rejeitada</h3>
+        <p>Seu responsável não aprovou este pedido no momento. Nenhuma ficha foi descontada.</p>
+      }
 
       <div class="summary-box">
         <div class="summary-item">
           <small>Tempo Solicitado</small>
           <strong>+{{ successResult.requestedMinutes || 0 }} min</strong>
         </div>
+
+        <div class="summary-item">
+          <small>Fichas Trocadas</small>
+          <strong>{{ tokensToExchange }} ⭐</strong>
+        </div>
+
         <div class="summary-item">
           <small>Status</small>
-          <span class="status-pill">{{ successResult.status || 'PENDING' }}</span>
+          <span class="status-pill" [attr.data-status]="currentStatus">
+            {{ currentStatus === 'APPROVED' ? 'Aprovado' : (currentStatus === 'REJECTED' ? 'Rejeitado' : 'Pendente') }}
+          </span>
         </div>
+
         @if (successResult.remainingBalance !== undefined) {
           <div class="summary-item">
-            <small>Saldo Restante de Fichas</small>
-            <strong>{{ successResult.remainingBalance }} ⭐</strong>
+            <small>Tempo Restante de Tela</small>
+            <strong>{{ successResult.remainingBalance }} min</strong>
           </div>
         }
       </div>
 
-      <button class="btn-new-request" (click)="successResult = null">
-        Fazer nova troca
+      <button type="button" class="btn-new-request" (click)="resetRequest()">
+        {{ currentStatus === 'PENDING' ? 'Fazer outro pedido' : 'Fazer nova troca' }}
       </button>
     </div>
   } @else {
+    <!-- Formulário de Seleção e Troca de Fichas -->
     <div class="exchange-card">
       <div class="card-intro">
         <div class="tv-icon">📺</div>
@@ -79,11 +113,12 @@
       </div>
 
       <button 
+        type="button"
         class="btn-submit" 
         (click)="onExchangeTokens()"
         [disabled]="submitting || !tokensToExchange || tokensToExchange <= 0"
       >
-        {{ submitting ? 'Processando troca...' : 'Solicitar Tempo de Tela' }}
+        {{ submitting ? 'Enviando solicitação...' : 'Solicitar Tempo de Tela' }}
       </button>
     </div>
   }

@@ -1,0 +1,319 @@
+<div class="piggy-bank-page">
+
+  <main class="content">
+    <!-- Feedback Alerts -->
+    <div *ngIf="errorMessage()" class="alert-banner error-banner">
+      <span>{{ errorMessage() }}</span>
+      <button (click)="errorMessage.set(null)" class="close-btn">&times;</button>
+    </div>
+
+    <div *ngIf="successMessage()" class="toast-success">
+      <span>{{ successMessage() }}</span>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading()" class="loading-state">
+      <div class="spinner"></div>
+      <p>Consultando seu Cofrinho Mágico...</p>
+    </div>
+
+    <ng-container *ngIf="!isLoading() && dashboard() as data">
+      <!-- Cabeçalho -->
+      <header class="page-header">
+        <div class="title-wrapper">
+          <span class="badge-icon">🐷</span>
+          <div>
+            <h2>Meu Cofrinho Mágico</h2>
+            <p class="subtitle">Aprenda a poupar para conquistar seus maiores sonhos!</p>
+          </div>
+        </div>
+
+        <button (click)="openCreateGoalModal()" class="btn-create-goal">
+          <span>+ Nova Meta</span>
+        </button>
+      </header>
+
+      <!-- Painel de Saldos -->
+      <section class="balances-grid">
+        <div class="balance-card liquid">
+          <div class="card-icon">💵</div>
+          <div class="card-details">
+            <span class="label">Saldo Livre na Carteira</span>
+            <strong class="value">{{ liquidBalance() | currency:'BRL':'symbol':'1.2-2' }}</strong>
+            <small>Disponível para gastar ou guardar</small>
+          </div>
+        </div>
+
+        <div class="balance-card saved">
+          <div class="card-icon">🔒</div>
+          <div class="card-details">
+            <span class="label">Guardado em Metas</span>
+            <strong class="value">{{ totalSaved() | currency:'BRL':'symbol':'1.2-2' }}</strong>
+            <small>Focado nos seus objetivos</small>
+          </div>
+        </div>
+
+        <div class="balance-card total">
+          <div class="card-icon">🌟</div>
+          <div class="card-details">
+            <span class="label">Patrimônio Total</span>
+            <strong class="value">{{ totalCustody() | currency:'BRL':'symbol':'1.2-2' }}</strong>
+            <small>Livre + Metas guardadas</small>
+          </div>
+        </div>
+      </section>
+
+      <!-- Card do Rendimento Automático (Simulador Educativo) -->
+      <section class="yield-card" [class.yield-active]="data.interestEnabled">
+        <div class="yield-header">
+          <span class="yield-icon">📈</span>
+          <div class="yield-info">
+            <h3>Rendimento do Cofrinho</h3>
+            <p>{{ data.yieldMotivationMessage }}</p>
+          </div>
+        </div>
+
+        <div class="yield-stats" *ngIf="data.interestEnabled">
+          <div class="stat">
+            <span class="stat-label">Taxa</span>
+            <strong class="stat-val">{{ data.interestRate }}%</strong>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Ciclo</span>
+            <strong class="stat-val">{{ data.interestFrequency === 'WEEKLY' ? 'Semanal' : (data.interestFrequency === 'DAILY' ? 'Diário' : 'Mensal') }}</strong>
+          </div>
+          <div class="stat highlight">
+            <span class="stat-label">Próximo Bônus Estimado</span>
+            <strong class="stat-val">+{{ (data.projectedYieldNextCycle ?? 0) | currency:'BRL':'symbol':'1.2-2' }}</strong>
+          </div>
+        </div>
+      </section>
+
+      <!-- Metas de Poupança -->
+      <section class="goals-section">
+        <div class="section-title-row">
+          <h3>🎯 Minhas Metas de Poupança</h3>
+          <span class="goals-count">{{ data.goals?.length || 0 }} cadastradas</span>
+        </div>
+
+        <div class="goals-grid" *ngIf="data.goals && (data.goals.length || 0) > 0; else emptyGoals">
+          <article 
+            *ngFor="let goal of data.goals" 
+            class="goal-card"
+            [class.completed]="goal.status === 'COMPLETED'"
+          >
+            <div class="goal-header">
+              <span class="goal-icon">{{ getIconSymbol(goal.icon) }}</span>
+              <div class="goal-title-area">
+                <h4>{{ goal.title }}</h4>
+                <span class="status-pill" [attr.data-status]="goal.status">
+                  {{ goal.status === 'COMPLETED' ? 'Conquistado! 🎉' : 'Em andamento' }}
+                </span>
+              </div>
+            </div>
+
+            <p *ngIf="goal.description" class="goal-desc">{{ goal.description }}</p>
+
+            <div class="progress-details">
+              <div class="values-row">
+                <span class="current">{{ (goal.currentAmount ?? 0) | currency:'BRL':'symbol':'1.2-2' }}</span>
+                <span class="target">Meta: {{ (goal.targetAmount ?? 0) | currency:'BRL':'symbol':'1.2-2' }}</span>
+              </div>
+
+              <div class="progress-track">
+                <div class="progress-fill" [style.width.%]="goal.progressPercentage"></div>
+              </div>
+
+              <span class="percentage-label">{{ (goal.progressPercentage ?? 0).toFixed(0) }}% alcançado</span>
+            </div>
+
+            <div class="goal-actions">
+              <button 
+                type="button" 
+                class="btn-action deposit" 
+                (click)="openDepositModal(goal)"
+                [disabled]="goal.status === 'COMPLETED' || liquidBalance() <= 0"
+              >
+                📥 Guardar
+              </button>
+
+              <button 
+                type="button" 
+                class="btn-action withdraw" 
+                (click)="openWithdrawModal(goal)"
+                [disabled]="(goal.currentAmount ?? 0) <= 0"
+              >
+                🔨 Resgatar
+              </button>
+            </div>
+          </article>
+        </div>
+
+        <ng-template #emptyGoals>
+          <div class="empty-state">
+            <span class="empty-icon">🏖️</span>
+            <h4>Você ainda não tem metas cadastradas!</h4>
+            <p>Que tal criar um objetivo para comprar aquele brinquedo, jogo ou passeio que você tanto quer?</p>
+            <button (click)="openCreateGoalModal()" class="btn-create-goal">Começar Agora</button>
+          </div>
+        </ng-template>
+      </section>
+    </ng-container>
+
+    <!-- MODAL: Nova Meta -->
+    <div class="modal-backdrop" *ngIf="showCreateModal()">
+      <div class="modal-box">
+        <header class="modal-header">
+          <h3>🎯 Nova Meta de Poupança</h3>
+          <button class="modal-close" (click)="showCreateModal.set(false)">&times;</button>
+        </header>
+
+        <form (ngSubmit)="submitCreateGoal()">
+          <div class="form-group">
+            <label for="goalTitle">O que você quer conquistar?</label>
+            <input 
+              id="goalTitle" 
+              type="text" 
+              [(ngModel)]="newGoalTitle" 
+              name="title" 
+              placeholder="Ex: Bicicleta aro 20, Jogo novo..." 
+              required
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="goalDesc">Descrição (opcional)</label>
+            <input 
+              id="goalDesc" 
+              type="text" 
+              [(ngModel)]="newGoalDescription" 
+              name="desc" 
+              placeholder="Ex: Cor preta com marchas"
+            >
+          </div>
+
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label for="goalTarget">Valor Alvo (R$)</label>
+              <input 
+                id="goalTarget" 
+                type="number" 
+                [(ngModel)]="newGoalTargetAmount" 
+                name="target" 
+                step="0.50" 
+                min="1" 
+                placeholder="100.00" 
+                required
+              >
+            </div>
+
+            <div class="form-group flex-1">
+              <label for="goalIcon">Ícone da Meta</label>
+              <select id="goalIcon" [(ngModel)]="newGoalIcon" name="icon">
+                <option *ngFor="let ic of availableIcons" [value]="ic.value">{{ ic.label }}</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn-cancel" (click)="showCreateModal.set(false)">Cancelar</button>
+            <button type="submit" class="btn-submit" [disabled]="isProcessing()">
+              {{ isProcessing() ? 'Criando...' : 'Criar Meta' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- MODAL: Depositar na Meta -->
+    <div class="modal-backdrop" *ngIf="showDepositModal()">
+      <div class="modal-box">
+        <header class="modal-header">
+          <h3>📥 Guardar Dinheiro na Meta</h3>
+          <button class="modal-close" (click)="showDepositModal.set(false)">&times;</button>
+        </header>
+
+        <p class="modal-tip">
+          Meta: <strong>{{ selectedGoal?.title }}</strong><br>
+          Saldo disponível na carteira: <strong>{{ liquidBalance() | currency:'BRL':'symbol':'1.2-2' }}</strong>
+        </p>
+
+        <form (ngSubmit)="submitDeposit()">
+          <div class="form-group">
+            <label for="depositAmount">Quanto quer guardar? (R$)</label>
+            <input 
+              id="depositAmount" 
+              type="number" 
+              [(ngModel)]="actionAmount" 
+              name="deposit" 
+              step="0.50" 
+              min="0.50" 
+              [max]="liquidBalance()" 
+              placeholder="0.00" 
+              required
+            >
+          </div>
+
+          <div class="quick-values">
+            <button type="button" (click)="actionAmount = 1" [disabled]="liquidBalance() < 1">+ R$ 1</button>
+            <button type="button" (click)="actionAmount = 5" [disabled]="liquidBalance() < 5">+ R$ 5</button>
+            <button type="button" (click)="actionAmount = 10" [disabled]="liquidBalance() < 10">+ R$ 10</button>
+            <button type="button" (click)="actionAmount = liquidBalance()">Tudo</button>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn-cancel" (click)="showCreateModal.set(false)">Cancelar</button>
+            <button type="submit" class="btn-submit" [disabled]="isProcessing() || !actionAmount || actionAmount <= 0">
+              {{ isProcessing() ? 'Guardando...' : 'Confirmar Depósito' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- MODAL: Resgatar da Meta ("Quebrar Cofrinho") -->
+    <div class="modal-backdrop" *ngIf="showWithdrawModal()">
+      <div class="modal-box danger-mode">
+        <header class="modal-header">
+          <h3>🔨 Quebrar Cofrinho (Resgatar)</h3>
+          <button class="modal-close" (click)="showWithdrawModal.set(false)">&times;</button>
+        </header>
+
+        <p class="modal-tip">
+          Você está retirando dinheiro da meta <strong>{{ selectedGoal?.title }}</strong>.<br>
+          Valor guardado nesta meta: <strong>{{ (selectedGoal?.currentAmount ?? 0) | currency:'BRL':'symbol':'1.2-2' }}</strong>
+        </p>
+
+        <form (ngSubmit)="submitWithdraw()">
+          <div class="form-group">
+            <label for="withdrawAmount">Valor a resgatar para a carteira (R$)</label>
+            <input 
+              id="withdrawAmount" 
+              type="number" 
+              [(ngModel)]="actionAmount" 
+              name="withdraw" 
+              step="0.01" 
+              min="0.01" 
+              [max]="selectedGoal?.currentAmount ?? 0" 
+              placeholder="0.00" 
+              required
+            >
+          </div>
+
+          <div class="quick-values">
+            <button type="button" (click)="actionAmount = selectedGoal?.currentAmount ?? 0">
+              Resgatar Tudo
+            </button>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn-cancel" (click)="showWithdrawModal.set(false)">Desistir</button>
+            <button type="submit" class="btn-danger-submit" [disabled]="isProcessing() || !actionAmount || actionAmount <= 0">
+              {{ isProcessing() ? 'Resgatando...' : 'Confirmar Resgate' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+</div>

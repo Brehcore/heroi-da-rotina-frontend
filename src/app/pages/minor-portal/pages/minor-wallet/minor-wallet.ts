@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { WalletService, TransactionDTO, PageResponse } from '../../../wallet/wallet.service';
 import { Schemas } from '../../../../core/types/api.types';
+import { TransactionService } from '../../../wallet/transactions.service';
 
 export type WalletResponseDTO = Schemas['WalletResponseDTO'];
 
@@ -15,6 +16,7 @@ export type WalletResponseDTO = Schemas['WalletResponseDTO'];
 })
 export class MinorWallet implements OnInit {
   private walletService = inject(WalletService);
+  private transactionService = inject(TransactionService)
 
   wallet: WalletResponseDTO | null = null;
   transactions: TransactionDTO[] = [];
@@ -69,7 +71,7 @@ export class MinorWallet implements OnInit {
     if (!this.minorId) return;
 
     this.loadingTransactions = true;
-    this.walletService.getTransactions(this.minorId, this.currentPage, this.pageSize, this.currentSort).subscribe({
+    this.transactionService.getTransactions(this.minorId, this.currentPage, this.pageSize, this.currentSort).subscribe({
       next: (res: PageResponse<TransactionDTO>) => {
         this.transactions = res.content || [];
         this.totalPages = res.page?.totalPages ?? 0;

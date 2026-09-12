@@ -81,3 +81,212 @@
     transform: scale(1.02); 
 }
 .btn-approve:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.task-actions {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.btn-reject {
+	padding: 8px 16px;
+	background: #f44336;
+	color: #fff;
+	border: none;
+	border-radius: 6px;
+	cursor: pointer;
+	font-weight: 700;
+	font-size: 13px;
+	transition: all 0.2s;
+
+	&:hover:not(:disabled) {
+		opacity: 0.9;
+		transform: scale(1.02);
+	}
+
+	&:disabled {
+		opacity: 0.6;
+		cursor: not-allowed;
+	}
+}
+
+/* LOCAL: Final do arquivo home.scss */
+@media (max-width: 600px) {
+  .task-footer {
+    gap: 8px;
+
+    .task-reward {
+      font-size: 12px;
+    }
+
+    .task-actions {
+      gap: 6px;
+
+      .btn-approve,
+      .btn-reject {
+        padding: 6px 10px;
+        font-size: 11px;
+        border-radius: 5px;
+      }
+    }
+  }
+}
+
+/* ==========================================================
+   MODAL DE REJEIÇÃO / REVISÃO DA TAREFA
+   ========================================================== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 1000;
+  animation: fadeIn 0.15s ease-out;
+
+  .modal-card {
+    background: #ffffff;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 440px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    animation: scaleUp 0.15s ease-out;
+
+    .modal-header {
+      padding: 1.25rem 1.25rem 0.75rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      .modal-title-area {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+
+        .modal-icon {
+          font-size: 1.25rem;
+        }
+
+        h3 {
+          margin: 0;
+          font-size: 1.15rem;
+          font-weight: 800;
+          color: #1e293b;
+        }
+      }
+
+      .btn-close-modal {
+        background: transparent;
+        border: none;
+        font-size: 1.4rem;
+        color: #94a3b8;
+        cursor: pointer;
+        line-height: 1;
+
+        &:hover {
+          color: #1e293b;
+        }
+      }
+    }
+
+    .modal-body {
+      padding: 0 1.25rem 1rem;
+
+      .modal-instruction {
+        font-size: 0.88rem;
+        color: #475569;
+        margin: 0 0 0.85rem;
+        line-height: 1.4;
+
+        strong {
+          color: #1e293b;
+        }
+      }
+
+      .modal-textarea {
+        width: 100%;
+        box-sizing: border-box;
+        border: 1.5px solid #cbd5e1;
+        border-radius: 10px;
+        padding: 0.75rem;
+        font-size: 0.9rem;
+        font-family: inherit;
+        color: #1e293b;
+        resize: none;
+        outline: none;
+        transition: border-color 0.2s;
+
+        &:focus {
+          border-color: #ef4444;
+          box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
+        }
+
+        &::placeholder {
+          color: #94a3b8;
+          font-size: 0.85rem;
+        }
+      }
+    }
+
+    .modal-footer {
+      padding: 0.85rem 1.25rem 1.25rem;
+      background: #f8fafc;
+      border-top: 1px solid #f1f5f9;
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.65rem;
+
+      .btn-modal-cancel {
+        background: #ffffff;
+        border: 1px solid #cbd5e1;
+        color: #475569;
+        padding: 0.55rem 1rem;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: background-color 0.15s;
+
+        &:hover {
+          background-color: #f1f5f9;
+        }
+      }
+
+      .btn-modal-confirm {
+        background: #ef4444;
+        border: none;
+        color: #ffffff;
+        padding: 0.55rem 1.15rem;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: background-color 0.15s;
+
+        &:hover:not(:disabled) {
+          background-color: #dc2626;
+        }
+
+        &:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+      }
+    }
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleUp {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}

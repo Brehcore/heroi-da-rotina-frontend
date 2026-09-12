@@ -145,7 +145,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/wallets/minor/{minorId}/deposit-tokens": {
+    "/api/users": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Criar usuário
+         * @description Cria um novo usuário (monitor ou menor)
+         */
+        post: operations["create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/transactions/minor/{minorId}/deposit-tokens": {
         parameters: {
             query?: never;
             header?: never;
@@ -165,7 +185,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/wallets/minor/{minorId}/deduct-tokens": {
+    "/api/transactions/minor/{minorId}/deduct-tokens": {
         parameters: {
             query?: never;
             header?: never;
@@ -185,7 +205,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/wallets/minor/{minorId}/convert": {
+    "/api/transactions/minor/{minorId}/convert": {
         parameters: {
             query?: never;
             header?: never;
@@ -196,29 +216,9 @@ export interface paths {
         put?: never;
         /**
          * Converter fichas
-         * @description Transforma todas as fichas em saldo de dinheiro.
+         * @description Converte uma quantidade informada de fichas do menor em dinheiro no cofre.
          */
         post: operations["convertTokens"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/users": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Criar usuário
-         * @description Cria um novo usuário (monitor ou menor)
-         */
-        post: operations["create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -259,6 +259,66 @@ export interface paths {
          * @description Permite que o menor solicite a troca de fichas por minutos de tela. O sistema calcula o tempo automaticamente, e valida o limite do dia e o saldo de fichas.
          */
         post: operations["exchangeTokensForTime"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/minor-portal/piggy-bank/minor/{minorId}/goals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Criar nova meta de economia
+         * @description Cadastra uma meta ou item da wishlist para poupar dinheiro.
+         */
+        post: operations["createGoal"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/minor-portal/piggy-bank/minor/{minorId}/goals/{goalId}/withdraw": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Resgatar dinheiro da meta
+         * @description Devolve saldo da meta de volta para a carteira livre do menor.
+         */
+        post: operations["withdrawFromGoal"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/minor-portal/piggy-bank/minor/{minorId}/goals/{goalId}/deposit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Guardar dinheiro na meta
+         * @description Transfere saldo em dinheiro livre da carteira para uma meta de economia específica.
+         */
+        post: operations["depositToGoal"];
         delete?: never;
         options?: never;
         head?: never;
@@ -445,26 +505,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/wallets/minor/{minorId}/transactions": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Buscar Histórico
-         * @description Retorna o histórico financeiro do menor
-         */
-        get: operations["getMinorTransactionalHistory"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/users/me": {
         parameters: {
             query?: never;
@@ -477,6 +517,26 @@ export interface paths {
          * @description Retorna os dados do usuário autenticado no sistema
          */
         get: operations["getMyProfile"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/transactions/minor/{minorId}/transactions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Buscar Histórico
+         * @description Retorna o histórico financeiro do menor
+         */
+        get: operations["getMinorTransactionalHistory"];
         put?: never;
         post?: never;
         delete?: never;
@@ -605,6 +665,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/minor-portal/piggy-bank/minor/{minorId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Obter dados gerais do cofrinho
+         * @description Retorna visão consolidada de saldo livre, metas, rendimento e metas ativas.
+         */
+        get: operations["getDashboard"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/minor-portal/dashboard/{minorId}": {
         parameters: {
             query?: never;
@@ -616,7 +696,27 @@ export interface paths {
          * Obter dados do Dashboard
          * @description Retorna os resumos agregados de Carteira, Tempo de Tela, Missões do dia e Gamificação para um menor específico.
          */
-        get: operations["getDashboard"];
+        get: operations["getDashboard_1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/gamification/minor/{minorId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Consultar XP e Nível do Menor
+         * @description Retorna o nível atual, XP acumulado, meta para o próximo nível e porcentagem calculada.
+         */
+        get: operations["getMinorGamification"];
         put?: never;
         post?: never;
         delete?: never;
@@ -896,11 +996,6 @@ export interface components {
              */
             newPassword?: string;
         };
-        DeductTokensRequestDTO: {
-            /** Format: int32 */
-            amount: number;
-            motive: string;
-        };
         /** @description Dados para cadastro de um novo usuário (Monitor ou Menor) */
         UserCreateDTO: {
             /**
@@ -935,6 +1030,15 @@ export interface components {
              * @example https://api.dicebear.com/8.x/bottts/svg?seed=Lucas
              */
             profilePictureUrl?: string;
+        };
+        DeductTokensRequestDTO: {
+            /** Format: int32 */
+            amount: number;
+            motive: string;
+        };
+        ConvertTokensDTO: {
+            /** Format: int32 */
+            tokensToConvert: number;
         };
         /** @description Dados necessários para a criação de uma nova tarefa */
         TaskCreateDTO: {
@@ -1063,6 +1167,35 @@ export interface components {
              */
             remainingBalance?: number;
         };
+        SavingsGoalCreateDTO: {
+            title: string;
+            description?: string;
+            targetAmount: number;
+            /** Format: date */
+            targetDate?: string;
+            icon?: string;
+        };
+        SavingsGoalResponseDTO: {
+            /** Format: int64 */
+            id?: number;
+            title?: string;
+            description?: string;
+            targetAmount?: number;
+            currentAmount?: number;
+            /** Format: double */
+            progressPercentage?: number;
+            /** Format: date */
+            targetDate?: string;
+            icon?: string;
+            /** @enum {string} */
+            status?: "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
+        };
+        SavingsGoalWithdrawDTO: {
+            amount: number;
+        };
+        SavingsGoalDepositDTO: {
+            amount: number;
+        };
         /** @description Dados para criação de um novo grupo familiar */
         FamilyCreateDTO: {
             /**
@@ -1097,11 +1230,20 @@ export interface components {
              */
             profilePictureUrl?: string;
         };
+        /** @description Representa a configuração da cotação do token/ficha */
         InterestConfigDTO: {
-            /** Format: double */
+            /**
+             * Format: double
+             * @description Taxa de juros aplicada
+             */
             rate?: number;
+            /** @description Ativa/Inativa a taxa de juros */
             enabled?: boolean;
-            /** @enum {string} */
+            /**
+             * @description Define a frequência da taxa aplicada
+             * @example Diariamente, Semanalmente e Mensalmente
+             * @enum {string}
+             */
             frequency?: "DAILY" | "WEEKLY" | "MONTHLY";
         };
         /** @description Dados para reprovar uma tarefa e solicitar que seja refeita */
@@ -1184,6 +1326,18 @@ export interface components {
             content?: Record<string, never>[];
             page?: components["schemas"]["PageMetadata"];
         };
+        PiggyBankDashboardDTO: {
+            liquidWalletBalance?: number;
+            totalSavedInGoals?: number;
+            totalPiggyBalance?: number;
+            interestEnabled?: boolean;
+            /** Format: double */
+            interestRate?: number;
+            interestFrequency?: string;
+            projectedYieldNextCycle?: number;
+            yieldMotivationMessage?: string;
+            goals?: components["schemas"]["SavingsGoalResponseDTO"][];
+        };
         GamificationSummaryDTO: {
             /** Format: int32 */
             currentLevel?: number;
@@ -1234,6 +1388,18 @@ export interface components {
             /** Format: double */
             interestRate?: number;
             interestFrequency?: string;
+        };
+        GamificationResponseDTO: {
+            /** Format: int64 */
+            userId?: number;
+            /** Format: int32 */
+            currentLevel?: number;
+            /** Format: int32 */
+            currentXp?: number;
+            /** Format: int32 */
+            targetXp?: number;
+            /** Format: double */
+            progressPercentage?: number;
         };
     };
     responses: never;
@@ -1424,6 +1590,30 @@ export interface operations {
             };
         };
     };
+    create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UserCreateDTO"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["UserResponseDTO"];
+                };
+            };
+        };
+    };
     depositTokens: {
         parameters: {
             query: {
@@ -1480,7 +1670,11 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConvertTokensDTO"];
+            };
+        };
         responses: {
             /** @description OK */
             200: {
@@ -1488,30 +1682,6 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
-            };
-        };
-    };
-    create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UserCreateDTO"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["UserResponseDTO"];
-                };
             };
         };
     };
@@ -1559,6 +1729,86 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["ScreenTimeResponseDTO"];
+                };
+            };
+        };
+    };
+    createGoal: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                minorId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SavingsGoalCreateDTO"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["SavingsGoalResponseDTO"];
+                };
+            };
+        };
+    };
+    withdrawFromGoal: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                minorId: number;
+                goalId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SavingsGoalWithdrawDTO"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["SavingsGoalResponseDTO"];
+                };
+            };
+        };
+    };
+    depositToGoal: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                minorId: number;
+                goalId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SavingsGoalDepositDTO"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["SavingsGoalResponseDTO"];
                 };
             };
         };
@@ -1763,6 +2013,26 @@ export interface operations {
             };
         };
     };
+    getMyProfile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["UserResponseDTO"];
+                };
+            };
+        };
+    };
     getMinorTransactionalHistory: {
         parameters: {
             query: {
@@ -1783,26 +2053,6 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["PagedModel"];
-                };
-            };
-        };
-    };
-    getMyProfile: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["UserResponseDTO"];
                 };
             };
         };
@@ -1961,7 +2211,51 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
+                    "*/*": components["schemas"]["PiggyBankDashboardDTO"];
+                };
+            };
+        };
+    };
+    getDashboard_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                minorId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
                     "*/*": components["schemas"]["MinorDashboardResponseDTO"];
+                };
+            };
+        };
+    };
+    getMinorGamification: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                minorId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["GamificationResponseDTO"];
                 };
             };
         };

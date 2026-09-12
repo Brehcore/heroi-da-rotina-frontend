@@ -4,7 +4,7 @@
   <div class="content">
     <div *ngIf="error" class="error-banner">
       <span>{{ error }}</span>
-      <button (click)="error = null" class="close-btn">&times;</button>
+      <button type="button" (click)="dismissError()" class="close-btn" aria-label="Fechar">&times;</button>
     </div>
 
     <div *ngIf="successMsg" class="success-banner">
@@ -29,22 +29,26 @@
 
           <form class="modal-content" (ngSubmit)="createTask()">
             <label>Título</label>
-            <input type="text" [(ngModel)]="newTask.title" name="title" required placeholder="Ex: Arrumar o quarto" autofocus>
+            <input type="text" [(ngModel)]="newTask.title" name="title" required placeholder="Ex: Arrumar o quarto"
+              autofocus>
 
             <label>Descrição</label>
-            <textarea [(ngModel)]="newTask.description" name="description" required placeholder="Detalhes da atividade..."></textarea>
+            <textarea [(ngModel)]="newTask.description" name="description" required
+              placeholder="Detalhes da atividade..."></textarea>
 
             <label>Recompensa (Fichas/Tokens)</label>
-            <input type="number" [(ngModel)]="newTask.tokenReward" name="tokenReward" required min="1" placeholder="Ex: 10" title="Recompensa em fichas/tokens">
+            <input type="number" [(ngModel)]="newTask.tokenReward" name="tokenReward" required min="1"
+              placeholder="Ex: 10" title="Recompensa em fichas/tokens">
 
             <label>Menor Responsável</label>
             <select [(ngModel)]="newTask.minorId" name="minorId" required title="Selecione o menor responsável">
-              
+
               <option *ngIf="minors.length === 0" [ngValue]="0" disabled>Nenhum menor encontrado</option>
               <option *ngFor="let minor of minors" [ngValue]="minor.id">{{ minor.name }}</option>
             </select>
 
-            <button type="submit" class="btn-submit" [disabled]="loading || !newTask.title.trim()">{{ loading ? 'Salvando...' : 'Salvar' }}</button>
+            <button type="submit" class="btn-submit" [disabled]="loading || !newTask.title.trim()">{{ loading ?
+              'Salvando...' : 'Salvar' }}</button>
           </form>
         </div>
       </div>
@@ -71,12 +75,20 @@
               <td>{{ task.description }}</td>
               <td class="reward-cell">💰 {{ task.rewardTask }} Fichas</td>
               <td>{{ task.minorName }}</td>
-              <td><span class="status-badge" [ngClass]="task.status.toLowerCase()">{{ getStatusText(task.status) }}</span></td>
+              <td><span class="status-badge" [ngClass]="task.status.toLowerCase()">{{ getStatusText(task.status)
+                  }}</span></td>
               <td class="actions-cell">
-                <button *ngIf="userRole === 'MINOR' && (task.status === 'PENDENTE' || task.status === 'PENDING')" class="btn-conclude" (click)="concludeTask(task.id)">Concluir</button>
-                <button *ngIf="userRole === 'MONITOR' && (task.status === 'CONCLUIDA' || task.status === 'COMPLETED')" class="btn-approve" (click)="approveTask(task.id)">Aprovar</button>
-                <button *ngIf="userRole === 'MONITOR' && (task.status === 'CONCLUIDA' || task.status === 'COMPLETED')" class="btn-reject" (click)="rejectTask(task.id)">Rejeitar</button>
-                <button *ngIf="userRole === 'MONITOR'" class="btn-remove" (click)="deleteTask(task.id)" [disabled]="loading">🗑️</button>
+                <button *ngIf="userRole === 'MINOR' && (task.status === 'PENDENTE' || task.status === 'PENDING')"
+                  class="btn-conclude" (click)="concludeTask(task.id)">Concluir</button>
+                <button *ngIf="userRole === 'MONITOR' && (task.status === 'CONCLUIDA' || task.status === 'COMPLETED')"
+                  class="btn-approve" (click)="approveTask(task.id)">Aprovar</button>
+                <!-- LOCAL: Na linha 71 do tasks.html, substitua o botão btn-reject por: -->
+                <button *ngIf="userRole === 'MONITOR' && (task.status === 'CONCLUIDA' || task.status === 'COMPLETED')"
+                  class="btn-reject" (click)="openRejectModal(task)" [disabled]="loading">
+                  Rejeitar
+                </button>
+                <button *ngIf="userRole === 'MONITOR'" class="btn-remove" (click)="deleteTask(task.id)"
+                  [disabled]="loading">🗑️</button>
               </td>
             </tr>
           </tbody>
@@ -84,14 +96,51 @@
       </div>
 
       <!-- Paginação (Monitor) -->
-      <div class="pagination-controls" *ngIf="userRole === 'MONITOR'" style="display: flex; justify-content: center; gap: 16px; margin-top: 24px; align-items: center;">
-        <button style="padding: 8px 16px; background: #ffe600; color: #333; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;" 
-                (click)="previousPage()" [disabled]="currentPage === 0" [style.opacity]="currentPage === 0 ? 0.5 : 1">Anterior</button>
+      <div class="pagination-controls" *ngIf="userRole === 'MONITOR'"
+        style="display: flex; justify-content: center; gap: 16px; margin-top: 24px; align-items: center;">
+        <button
+          style="padding: 8px 16px; background: #ffe600; color: #333; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;"
+          (click)="previousPage()" [disabled]="currentPage === 0"
+          [style.opacity]="currentPage === 0 ? 0.5 : 1">Anterior</button>
         <span style="color: #fff; font-weight: bold;">Página {{ currentPage + 1 }} de {{ totalPages }}</span>
-        <button style="padding: 8px 16px; background: #ffe600; color: #333; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;" 
-                (click)="nextPage()" [disabled]="currentPage >= totalPages - 1" [style.opacity]="currentPage >= totalPages - 1 ? 0.5 : 1">Próxima</button>
+        <button
+          style="padding: 8px 16px; background: #ffe600; color: #333; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;"
+          (click)="nextPage()" [disabled]="currentPage >= totalPages - 1"
+          [style.opacity]="currentPage >= totalPages - 1 ? 0.5 : 1">Próxima</button>
       </div>
 
+    </div>
+  </div>
+
+  <!-- Modal Customizado de Rejeição/Revisão -->
+  <div class="reject-modal-overlay" *ngIf="isRejectModalOpen" (click)="closeRejectModal()">
+    <div class="reject-modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-header-reject">
+        <div class="header-title-row">
+          <span class="header-icon">📝</span>
+          <h3>Solicitar Revisão</h3>
+        </div>
+        <button type="button" class="btn-close-x" (click)="closeRejectModal()">&times;</button>
+      </div>
+
+      <div class="modal-body-reject">
+        <p class="instruction-text">
+          Explique para o menor o que precisa ser ajustado na missão <strong>"{{ rejectTaskTitle }}"</strong>:
+        </p>
+
+        <textarea [(ngModel)]="rejectReason" name="rejectReasonInput" rows="3" class="reject-textarea"
+          placeholder="Ex: Faltou guardar os calçados e arrumar a escrivaninha." autofocus></textarea>
+      </div>
+
+      <div class="modal-footer-reject">
+        <button type="button" class="btn-cancel" (click)="closeRejectModal()">
+          Cancelar
+        </button>
+        <button type="button" class="btn-confirm" (click)="confirmReject()"
+          [disabled]="!rejectReason.trim() || loading">
+          {{ loading ? 'Enviando...' : 'Confirmar Revisão' }}
+        </button>
+      </div>
     </div>
   </div>
 </div>

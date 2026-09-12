@@ -6,7 +6,7 @@
       <span>{{ error }}</span>
       <button (click)="error = null" class="close-btn">&times;</button>
     </div>
-    
+
     <div *ngIf="successMsg" class="success-banner">
       <span>{{ successMsg }}</span>
       <button (click)="successMsg = null" class="close-btn">&times;</button>
@@ -14,7 +14,7 @@
 
     <div class="header">
       <h2>Controle Financeiro</h2>
-      
+
       <div class="minor-selector" *ngIf="userRole === 'MONITOR' && minors.length > 0">
         <label for="minorSelect">Visualizando carteira de:</label>
         <select id="minorSelect" [(ngModel)]="selectedMinorId" (change)="onMinorChange()">
@@ -58,36 +58,42 @@
         <div class="icon">📈</div>
         <div class="info">
           <span class="label">Taxa de Juros</span>
-          <span class="value">{{ wallet?.interestRate || 0 }}% <span class="frequency-text">({{ getFrequencyText(wallet?.interestFrequency) }})</span></span>
+          <span class="value">{{ wallet?.interestRate || 0 }}% <span class="frequency-text">({{
+              getFrequencyText(wallet?.interestFrequency) }})</span></span>
         </div>
       </div>
     </div>
 
     <div class="cards-container" *ngIf="userRole === 'MONITOR'">
-      
+
       <!-- Adicionar/Remover Fichas (Monitor) -->
       <div class="card">
         <h3>Adicionar ou Remover Fichas</h3>
         <p>Deposite fichas como recompensa ou remova como penalidade.</p>
         <div class="form-row">
-          <input type="number" [(ngModel)]="transactionAmount" name="amount" placeholder="Quantidade" required min="1" class="small-input">
-          <input type="text" [(ngModel)]="transactionMotive" name="motive" placeholder="Motivo (Ex: Bônus ou Penalidade)" required>
-          <button type="button" class="btn-primary" (click)="depositTokens()" [disabled]="loading || !transactionAmount || !transactionMotive">Depositar</button>
-          <button type="button" class="btn-danger" (click)="deductTokens()" [disabled]="loading || !transactionAmount || !transactionMotive">Remover</button>
+          <input type="number" [(ngModel)]="transactionAmount" name="amount" placeholder="Quantidade" required min="1"
+            class="small-input">
+          <input type="text" [(ngModel)]="transactionMotive" name="motive"
+            placeholder="Motivo (Ex: Bônus ou Penalidade)" required>
+          <button type="button" class="btn-primary" (click)="depositTokens()"
+            [disabled]="loading || !transactionAmount || !transactionMotive">Depositar</button>
+          <button type="button" class="btn-danger" (click)="deductTokens()"
+            [disabled]="loading || !transactionAmount || !transactionMotive">Remover</button>
         </div>
       </div>
-    
+
 
       <!-- Configurações Financeiras -->
       <div class="settings-grid">
-        
+
         <!-- Alterar Cotação -->
         <div class="card">
           <h3>Cotação da Ficha</h3>
           <p>Defina o valor em Reais (R$) de 1 Ficha.</p>
           <form (ngSubmit)="updateQuotation()" class="form-row">
             <span class="currency-symbol">R$</span>
-            <input id="quotationInput" type="number" [(ngModel)]="newQuotation" name="quotation" step="0.01" required placeholder="Ex: 0.50" aria-label="Cotação da ficha">
+            <input id="quotationInput" type="number" [(ngModel)]="newQuotation" name="quotation" step="0.01" required
+              placeholder="Ex: 0.50" aria-label="Cotação da ficha">
             <button type="submit" class="btn-secondary" [disabled]="loading || newQuotation < 0">Atualizar</button>
           </form>
         </div>
@@ -103,7 +109,8 @@
             </div>
             <div class="form-row interest-form-row">
               <span class="currency-symbol">%</span>
-              <input type="number" [(ngModel)]="interestRate" name="rate" step="0.01" placeholder="Taxa" required class="small-input">
+              <input type="number" [(ngModel)]="interestRate" name="rate" step="0.01" placeholder="Taxa" required
+                class="small-input">
               <select [(ngModel)]="interestFrequency" name="frequency" required aria-label="Frequência do rendimento">
                 <option value="DAILY">Diário</option>
                 <option value="WEEKLY">Semanal</option>
@@ -116,15 +123,35 @@
 
       </div>
 
-      <!-- Ações Destrutivas / Conversão -->
+      <!-- Conversão Parcial/Total de Fichas -->
       <div class="card conversion-card">
         <div class="conversion-info">
-          <h3>Converter Todas as Fichas</h3>
-          <p>Transforma o saldo atual de <strong>{{wallet?.tokensBalance || 0}} fichas</strong> do menor em dinheiro no cofrinho usando a cotação de R$ {{ (wallet?.tokenQuotation || 0).toFixed(2) }}.</p>
+          <h3>Converter Fichas em Dinheiro</h3>
+          <p>
+            Saldo disponível: <strong>{{ wallet?.tokensBalance || 0 }} fichas</strong> (Cotação: R$ {{
+            (wallet?.tokenQuotation || 0).toFixed(2) }} cada).
+          </p>
+
+          <div class="form-row">
+            <input type="number" [(ngModel)]="tokensToConvert" name="tokensToConvert" placeholder="Qtd. Fichas"
+              [min]="1" [max]="wallet?.tokensBalance || 0" class="small-input">
+
+            <button type="button" class="btn-secondary" (click)="tokensToConvert = wallet?.tokensBalance || 0"
+              [disabled]="loading || (wallet?.tokensBalance || 0) <= 0">
+              Converter Todas
+            </button>
+
+            <button type="button" class="btn-convert" (click)="convertTokens()"
+              [disabled]="loading || !tokensToConvert || tokensToConvert <= 0 || tokensToConvert > (wallet?.tokensBalance || 0)">
+              Efetuar Conversão
+            </button>
+          </div>
+
+          <small *ngIf="tokensToConvert && tokensToConvert > 0" class="conversion-preview">
+            Total a creditar no cofrinho: <strong>R$ {{ (tokensToConvert * (wallet?.tokenQuotation || 0)).toFixed(2)
+              }}</strong>
+          </small>
         </div>
-        <button class="btn-convert" (click)="convertTokens()" [disabled]="loading || (wallet?.tokensBalance || 0) <= 0">
-          Efetuar Conversão
-        </button>
       </div>
 
     </div>

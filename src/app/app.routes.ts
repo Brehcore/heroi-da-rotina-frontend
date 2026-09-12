@@ -16,6 +16,9 @@ import { MinorTasks } from './pages/minor-portal/pages/minor-tasks/minor-tasks';
 import { MinorScreenTime } from './pages/minor-portal/pages/minor-screentime/minor-screentime';
 import { MinorWallet } from './pages/minor-portal/pages/minor-wallet/minor-wallet';
 import { MinorDashboard } from './pages/minor-portal/pages/minor-dashboard/minor-dashboard'
+import { MinorPiggyBank } from './pages/minor-portal/pages/minor-piggy-bank/minor-piggy-bank';
+import { MinorHistory } from './pages/minor-portal/pages/minor-history/minor-history';
+import { MinorAchievements } from './pages/minor-portal/pages/minor-achievements/minor-achievements';
 
 export const routes: Routes = [
   // Rota raiz carregando a landing page
@@ -48,9 +51,9 @@ export const routes: Routes = [
       { path: 'dashboard', component: MinorDashboard },
       { path: 'screen-time', component: MinorScreenTime },
       { path: 'wallet', component: MinorWallet },
-      // { path: 'piggy-bank', component: MinorPiggyBank },
-      // { path: 'history', component: MinorHistory },
-      // { path: 'achievements', component: MinorAchievements }
+      { path: 'piggy-bank', component: MinorPiggyBank },
+      { path: 'history', component: MinorHistory },
+      { path: 'achievements', component: MinorAchievements },
     ]
   },
 

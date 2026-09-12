@@ -1,6 +1,5 @@
 import { Injectable, inject, NgZone } from '@angular/core';
 import { Client, Message } from '@stomp/stompjs';
-import SockJS from 'sockjs-client/dist/sockjs';
 import { Subject, Observable } from 'rxjs';
 import { ScreenTimeResponseDTO } from './models/screentime.model';
 import { environment } from '../../../environments/environment';
@@ -17,8 +16,7 @@ export class NotificationWebSocketService {
     return this.notificationSubject.asObservable();
   }
 
-  // Método privado para evitar repetição de código na emissão
-  private emitNotification(message: Message) {
+  private emitNotification(message: Message): void {
     if (message.body) {
       const notification: ScreenTimeResponseDTO = JSON.parse(message.body);
       this.ngZone.run(() => {
@@ -27,23 +25,36 @@ export class NotificationWebSocketService {
     }
   }
 
-  // Método genérico para garantir que estamos conectados
+  /**
+   * Converte a URL HTTP para WS nativo com sufixo /websocket exigido pelo Spring Boot
+   */
+  private getNativeBrokerUrl(): string {
+    const rawUrl = environment.wsUrl.replace(/^http/, 'ws');
+    return rawUrl.endsWith('/websocket') ? rawUrl : `${rawUrl}/websocket`;
+  }
+
   private ensureConnected(onConnectCallback: () => void): void {
     if (this.stompClient?.active) {
       onConnectCallback();
       return;
     }
 
-    const socket = new SockJS(environment.wsUrl);
     this.stompClient = new Client({
-      webSocketFactory: () => socket as any,
+      brokerURL: this.getNativeBrokerUrl(),
       reconnectDelay: 5000,
+      heartbeatIncoming: 10000,
+      heartbeatOutgoing: 10000,
       debug: (msg: string) => console.log('STOMP: ', msg)
     });
 
     this.stompClient.onConnect = () => {
-      console.log('WebSocket Conectado!');
+      console.log('WebSocket Nativo Conectado!');
       onConnectCallback();
+    };
+
+    this.stompClient.onStompError = (frame) => {
+      console.error('Broker reportou erro: ' + frame.headers['message']);
+      console.error('Detalhes adicionais: ' + frame.body);
     };
 
     this.stompClient.activate();

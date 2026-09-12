@@ -5,6 +5,8 @@
   align-items: center;
   justify-content: space-between;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  position: relative;
+  z-index: 50;
 
   .user-welcome {
     display: flex;
@@ -25,7 +27,7 @@
         margin: 0;
         font-size: 1.25rem;
         font-weight: 800;
-        color: #1E293B;
+        color: #1e293b;
       }
       p {
         margin: 0.15rem 0 0;
@@ -36,35 +38,57 @@
     }
   }
 
+  // Mini card de XP no topo para mobile
+  .mobile-hero-badge {
+    display: none;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(255, 255, 255, 0.85);
+    padding: 0.3rem 0.6rem;
+    border-radius: 20px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+
+    .badge-text {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+
+      strong {
+        font-size: 0.75rem;
+        color: #0f172a;
+        line-height: 1;
+      }
+
+      .mini-track {
+        width: 48px;
+        height: 4px;
+        background: #e2e8f0;
+        border-radius: 4px;
+        overflow: hidden;
+
+        .mini-fill {
+          height: 100%;
+          background: #0284c7;
+        }
+      }
+    }
+
+    .mini-mascot {
+      width: 26px;
+      height: auto;
+    }
+  }
+
   .header-actions {
     display: flex;
     align-items: center;
     gap: 1.25rem;
 
-    .notification-btn {
-      position: relative;
-      cursor: pointer;
-      font-size: 1.2rem;
-
-      .badge {
-        position: absolute;
-        top: -6px;
-        right: -8px;
-        background: #ef4444;
-        color: #ffffff;
-        font-size: 0.65rem;
-        font-weight: bold;
-        border-radius: 10px;
-        padding: 1px 5px;
-        border: 2px solid #ffe600;
-      }
-    }
-
     .btn-exit {
       background-color: #ef4444;
       color: #ffffff;
       border: none;
-      padding: 0.45rem 1.4rem;
+      padding: 0.45rem 1.2rem;
       border-radius: 6px;
       font-weight: 700;
       font-size: 0.85rem;
@@ -78,12 +102,30 @@
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 860px) {
   .minor-header {
-    padding: 0.75rem 1rem;
+    padding: 0.65rem 1rem;
+    gap: 0.75rem;
 
-    .welcome-details p {
+    .user-welcome .welcome-details p {
       display: none;
+    }
+
+    .mobile-hero-badge {
+      display: flex;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .minor-header {
+    .user-welcome .welcome-details h1 {
+      font-size: 1rem;
+    }
+
+    .header-actions .btn-exit {
+      padding: 0.35rem 0.8rem;
+      font-size: 0.75rem;
     }
   }
 }

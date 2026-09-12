@@ -4,7 +4,11 @@ import { FormsModule } from '@angular/forms';
 import { Navbar } from '../../shared/navbar/navbar';
 import { AuthService } from '../../core/services/auth.service';
 import { WalletService } from './wallet.service';
-import { WalletResponseDTO, InterestFrequency, InterestConfigDTO } from '../../core/services/models/wallet.model';
+import { TransactionService } from './transactions.service';
+import { Schemas } from '../../core/types/api.types';
+
+export type InterestFrequencyType = 'DAILY' | 'WEEKLY' | 'MONTHLY';
+export type WalletResponseDTO = Schemas['WalletResponseDTO'];
 
 @Component({
   selector: 'app-wallet',
@@ -16,6 +20,7 @@ import { WalletResponseDTO, InterestFrequency, InterestConfigDTO } from '../../c
 export class Wallet implements OnInit {
   authService = inject(AuthService);
   private walletService = inject(WalletService);
+  private transactionService = inject(TransactionService);
   private platformId = inject(PLATFORM_ID);
   private cdr = inject(ChangeDetectorRef);
 
@@ -24,12 +29,10 @@ export class Wallet implements OnInit {
 
   minors: any[] = [];
   selectedMinorId: number = 0;
-  wallet: WalletResponseDTO | null = { 
-    id: 0, minorId: 0, minorName: '', tokensBalance: 0, moneyBalance: 0, 
-    tokenQuotation: 0, interestRate: 0, interestEnabled: false, interestFrequency: InterestFrequency.WEEKLY 
-  };
+  wallet: WalletResponseDTO | null = null;
   
   // Variáveis de Formulários
+  tokensToConvert: number | null = null;
   transactionAmount: number = 0;
   transactionMotive: string = '';
   
@@ -37,7 +40,7 @@ export class Wallet implements OnInit {
   
   interestRate: number = 0;
   interestEnabled: boolean = false;
-  interestFrequency: InterestFrequency = InterestFrequency.WEEKLY;
+  interestFrequency: InterestFrequencyType = 'WEEKLY';
 
   loading = false;
   error: string | null = null;
@@ -83,37 +86,26 @@ export class Wallet implements OnInit {
     this.loading = true;
     this.error = null;
     
-    // Zera os valores apenas ao trocar de menor no dropdown para evitar que a tela pisque
-    if (!this.wallet || this.wallet.minorId !== this.selectedMinorId) {
-      this.wallet = { 
-        id: 0, minorId: this.selectedMinorId, minorName: '', tokensBalance: 0, moneyBalance: 0, 
-        tokenQuotation: 0, interestRate: 0, interestEnabled: false, interestFrequency: InterestFrequency.WEEKLY 
-      };
-    }
-    
     this.walletService.getWallet(this.selectedMinorId).subscribe({
       next: (data) => { 
         if (data) {
-          console.log('Dados da Carteira recebidos do Banco:', data);
           this.wallet = data;
           
-          // Mapeamento seguro para aceitar nomes de campos no plural ou singular vindos do backend
           const money = (data as any).moneyBalances ?? (data as any).moneyBalance ?? 0;
           const tokens = (data as any).tokenBalances ?? (data as any).tokensBalance ?? (data as any).tokenBalance ?? 0;
           const quotation = (data as any).tokenQuotation ?? (data as any).tokenQuotations ?? 0;
 
-          // Força a conversão para número para evitar o crash de tela do '.toFixed(2)' no HTML
           this.wallet.moneyBalance = Number(money) || 0;
           this.wallet.tokensBalance = Number(tokens) || 0;
           this.wallet.tokenQuotation = Number(quotation) || 0;
           
           this.newQuotation = this.wallet.tokenQuotation;
           this.interestRate = Number(data.interestRate) || 0;
-          this.interestEnabled = data.interestEnabled;
-          this.interestFrequency = data.interestFrequency || InterestFrequency.WEEKLY;
+          this.interestEnabled = Boolean(data.interestEnabled);
+          this.interestFrequency = (data.interestFrequency as InterestFrequencyType) || 'WEEKLY';
         }
         this.loading = false; 
-        this.cdr.detectChanges(); // Força a tela a exibir os novos saldos na mesma hora
+        this.cdr.detectChanges();
       },
       error: (err) => { 
         console.error(err); 
@@ -128,7 +120,7 @@ export class Wallet implements OnInit {
     if (!this.selectedMinorId || !this.transactionAmount || !this.transactionMotive) return;
     this.loading = true; this.error = null; this.successMsg = null;
 
-    this.walletService.depositTokens(this.selectedMinorId, this.transactionAmount, this.transactionMotive).subscribe({
+    this.transactionService.depositTokens(this.selectedMinorId, this.transactionAmount, this.transactionMotive).subscribe({
       next: () => { 
         this.successMsg = 'Fichas depositadas com sucesso!'; 
         this.cdr.detectChanges();
@@ -152,7 +144,7 @@ export class Wallet implements OnInit {
     if (!this.selectedMinorId || !this.transactionAmount || !this.transactionMotive) return;
     this.loading = true; this.error = null; this.successMsg = null;
 
-    this.walletService.deductTokens(this.selectedMinorId, this.transactionAmount, this.transactionMotive).subscribe({
+    this.transactionService.deductTokens(this.selectedMinorId, this.transactionAmount, this.transactionMotive).subscribe({
       next: () => { 
         this.successMsg = 'Fichas removidas com sucesso!'; 
         this.cdr.detectChanges();
@@ -198,7 +190,7 @@ export class Wallet implements OnInit {
     if (!this.selectedMinorId) return;
     this.loading = true; this.error = null; this.successMsg = null;
 
-    const config: InterestConfigDTO = {
+    const config = {
       rate: this.interestRate,
       enabled: this.interestEnabled,
       frequency: this.interestFrequency
@@ -223,28 +215,46 @@ export class Wallet implements OnInit {
   }
 
   convertTokens() {
-    if (!this.selectedMinorId || !this.wallet || this.wallet.tokensBalance <= 0) {
-      this.error = 'Saldo de fichas insuficiente para conversão.';
+    const currentTokens = this.wallet?.tokensBalance || 0;
+
+    if (!this.selectedMinorId) return;
+
+    if (!this.tokensToConvert || this.tokensToConvert <= 0) {
+      this.error = 'Informe uma quantidade de fichas válida maior que zero.';
       return;
     }
-    
-    if (!confirm('Deseja converter todas as fichas deste menor em dinheiro?')) return;
-    
-    this.loading = true; this.error = null; this.successMsg = null;
 
-    this.walletService.convertTokensToMoney(this.selectedMinorId).subscribe({
-      next: () => { 
-        this.successMsg = 'Fichas convertidas com sucesso!'; 
+    if (this.tokensToConvert > currentTokens) {
+      this.error = `Saldo insuficiente. O menor possui apenas ${currentTokens} fichas.`;
+      return;
+    }
+
+    const cotacao = this.wallet?.tokenQuotation || 0;
+    const valorEstimado = (this.tokensToConvert * cotacao).toFixed(2);
+
+    if (!confirm(`Deseja converter ${this.tokensToConvert} fichas em R$ ${valorEstimado} no cofrinho?`)) {
+      return;
+    }
+
+    this.loading = true;
+    this.error = null;
+    this.successMsg = null;
+
+    this.transactionService.convertTokensToMoney(this.selectedMinorId, this.tokensToConvert).subscribe({
+      next: () => {
+        this.successMsg = `${this.tokensToConvert} fichas convertidas com sucesso em R$ ${valorEstimado}!`;
+        this.tokensToConvert = null;
         this.cdr.detectChanges();
-        this.loadWallet(); 
+        this.loadWallet();
         setTimeout(() => {
           this.successMsg = null;
           this.cdr.detectChanges();
-        }, 2000);
+        }, 3000);
       },
-      error: () => { 
-        this.error = 'Erro ao converter fichas.'; 
-        this.loading = false; 
+      error: (err) => {
+        console.error(err);
+        this.error = err?.error?.message || 'Erro ao converter fichas.';
+        this.loading = false;
         this.cdr.detectChanges();
       }
     });

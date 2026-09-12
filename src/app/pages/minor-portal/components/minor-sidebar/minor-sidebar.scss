@@ -1,73 +1,68 @@
 .minor-sidebar {
   width: 250px;
   background-color: #ffffff;
-  border-right: 1px solid #E2E8F0;
+  border-right: 1px solid #e2e8f0;
   display: flex;
   flex-direction: column;
   padding: 1.5rem 1rem;
   gap: 1.5rem;
   box-sizing: border-box;
 
-.nav-menu {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-
-  .nav-item {
-    position: relative;
+  .nav-menu {
     display: flex;
-    align-items: center;
-    gap: 0.85rem;
-    padding: 0.75rem 1rem;
-    border-radius: 10px;
-    text-decoration: none;
-    color: #475569;
-    font-weight: 600;
-    font-size: 0.92rem;
-    cursor: pointer;
+    flex-direction: column;
+    gap: 0.35rem;
 
-    transition:
-      background-color 0.2s ease,
-      color 0.2s ease,
-      transform 0.2s ease;
+    .nav-item {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      padding: 0.75rem 1rem;
+      border-radius: 10px;
+      text-decoration: none;
+      color: #475569;
+      font-weight: 600;
+      font-size: 0.92rem;
+      cursor: pointer;
+      transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
 
-    &:hover {
-      background-color: #f1f5f9;
-      color: #1e293b;
-      transform: translateX(3px);
-    }
-
-    .nav-icon {
-      font-size: 1.15rem;
-
-      transition: transform 0.2s ease;
-    }
-
-    &:hover .nav-icon {
-      transform: scale(1.08);
-    }
-
-    &.active {
-      background-color: #fef9c3;
-      color: #854d0e;
-      font-weight: 700;
+      &:hover {
+        background-color: #f1f5f9;
+        color: #1e293b;
+        transform: translateX(3px);
+      }
 
       .nav-icon {
-        transform: none;
+        font-size: 1.15rem;
+        transition: transform 0.2s ease;
+      }
+
+      &:hover .nav-icon {
+        transform: scale(1.08);
+      }
+
+      &.active {
+        background-color: #fef9c3;
+        color: #854d0e;
+        font-weight: 700;
+
+        .nav-icon {
+          transform: none;
+        }
+      }
+
+      &:focus-visible {
+        outline: 2px solid #94a3b8;
+        outline-offset: 2px;
       }
     }
-
-    &:focus-visible {
-      outline: 2px solid #94a3b8;
-      outline-offset: 2px;
-    }
   }
-}
 
   // Card do Herói
   .hero-level-card {
     background: #ffffff;
-    border: 1px solid #E2E8F0;
+    border: 1px solid #e2e8f0;
     border-radius: 14px;
     padding: 1rem;
     display: flex;
@@ -82,12 +77,12 @@
 
       small {
         font-size: 0.7rem;
-        color: #64748B;
+        color: #64748b;
       }
 
       strong {
         font-size: 1.1rem;
-        color: #1E293B;
+        color: #1e293b;
         margin: 0.15rem 0 0.4rem;
       }
 
@@ -100,7 +95,7 @@
 
       .progress-track {
         height: 6px;
-        background-color: #E2E8F0;
+        background-color: #e2e8f0;
         border-radius: 10px;
         overflow: hidden;
 
@@ -123,7 +118,7 @@
   // Frase Diária
   .daily-quote-card {
     background-color: #ffffff;
-    border: 1px solid #E2E8F0;
+    border: 1px solid #e2e8f0;
     border-radius: 12px;
     padding: 0.9rem;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
@@ -150,14 +145,80 @@
       display: block;
       margin-top: 0.4rem;
       font-size: 0.7rem;
-      color: #64748B;
+      color: #64748b;
       text-align: right;
     }
   }
 }
 
+// BARRA DE NAVEGAÇÃO INFERIOR (Padrão oculta no Desktop)
+.minor-bottom-bar {
+  display: none;
+}
+
+// RESPONSIVIDADE (Mobile / Telas menores que 860px)
 @media (max-width: 860px) {
   .minor-sidebar {
-    display: none; // No mobile, prioriza o conteúdo central ou menu drawer
+    display: none; // Oculta a sidebar lateral
+  }
+
+  .minor-bottom-bar {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: #ffffff;
+    border-top: 1px solid #e2e8f0;
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.06);
+    z-index: 1000;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none; // Firefox
+    -webkit-overflow-scrolling: touch;
+    padding: 0.4rem 0.5rem calc(0.4rem + env(safe-area-inset-bottom));
+
+    &::-webkit-scrollbar {
+      display: none; // Chrome/Safari
+    }
+
+    .bottom-nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-width: 68px;
+      flex: 1 0 auto;
+      padding: 0.35rem 0.2rem;
+      text-decoration: none;
+      color: #64748b;
+      border-radius: 8px;
+      transition: all 0.15s ease;
+
+      .nav-icon {
+        font-size: 1.25rem;
+        line-height: 1.2;
+      }
+
+      .nav-label {
+        font-size: 0.68rem;
+        font-weight: 600;
+        margin-top: 0.15rem;
+        white-space: nowrap;
+      }
+
+      &.active {
+        color: #854d0e;
+        background-color: #fef9c3;
+
+        .nav-label {
+          font-weight: 800;
+        }
+      }
+
+      &:active {
+        transform: scale(0.95);
+      }
+    }
   }
 }

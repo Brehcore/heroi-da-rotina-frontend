@@ -7,7 +7,7 @@
 			<span>{{ error }}</span>
 			<button (click)="error = null" class="close-btn">&times;</button>
 		</div>
-		
+
 		<!-- Mensagem de Sucesso (Pop-up 2s) -->
 		<div *ngIf="successMsg" class="success-banner">
 			<span>{{ successMsg }}</span>
@@ -40,10 +40,57 @@
 						<span class="reward-label">Recompensa:</span>
 						<span class="reward-value">{{ task.rewardTask }} tokens</span>
 					</div>
-					<button class="btn-approve" (click)="approveTask(task.id)" [disabled]="loading">
-						✓ Aprovar
-					</button>
+
+					<div class="task-actions">
+						<button class="btn-approve" (click)="approveTask(task.id)" [disabled]="loading">
+							✓ Aprovar
+						</button>
+						<button class="btn-reject" (click)="openRejectModal(task)" [disabled]="loading">
+							✕ Rejeitar
+						</button>
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>
+
+	<!-- Modal Customizado de Rejeição/Revisão -->
+<div class="modal-overlay" *ngIf="isRejectModalOpen" (click)="closeRejectModal()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div class="modal-title-area">
+        <span class="modal-icon">📝</span>
+        <h3>Solicitar Revisão</h3>
+      </div>
+      <button type="button" class="btn-close-modal" (click)="closeRejectModal()">&times;</button>
+    </div>
+
+    <div class="modal-body">
+      <p class="modal-instruction">
+        Explique para o menor o que precisa ser ajustado na missão <strong>"{{ rejectTaskTitle }}"</strong>:
+      </p>
+
+      <textarea
+        [(ngModel)]="rejectReason"
+        rows="3"
+        class="modal-textarea"
+        placeholder="Ex: Faltou dobrar os cobertores e guardar os sapatos."
+        autofocus
+      ></textarea>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="btn-modal-cancel" (click)="closeRejectModal()">
+        Cancelar
+      </button>
+      <button 
+        type="button" 
+        class="btn-modal-confirm" 
+        (click)="confirmReject()" 
+        [disabled]="!rejectReason.trim() || loading">
+        {{ loading ? 'Enviando...' : 'Confirmar Revisão' }}
+      </button>
+    </div>
+  </div>
+</div>
 </div>

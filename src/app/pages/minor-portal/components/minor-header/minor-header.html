@@ -11,6 +11,17 @@
     </div>
   </div>
 
+  <!-- Widget de XP exibido no mobile quando a sidebar sumir -->
+  <div class="mobile-hero-badge" *ngIf="level()">
+    <div class="badge-text">
+      <strong>Nv. {{ level() }}</strong>
+      <div class="mini-track">
+        <div class="mini-fill" [style.width.%]="xpPercentage()"></div>
+      </div>
+    </div>
+    <img src="/minor-hero.png" alt="Herói" class="mini-mascot" />
+  </div>
+
   <div class="header-actions">
     <button class="btn-exit" (click)="onLogout()">Sair</button>
   </div>

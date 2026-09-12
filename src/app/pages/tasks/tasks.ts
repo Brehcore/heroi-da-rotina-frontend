@@ -25,13 +25,14 @@ export class Tasks implements OnInit {
   private cdr = inject(ChangeDetectorRef);
 
   private readonly DICEBEAR_BASE = 'https://api.dicebear.com/8.x/avataaars/svg';
-  
+  private errorTimeout: any;
+
   tasks: TaskResponseDTO[] = [];
   loading = false;
   error: string | null = null;
   successMsg: string | null = null;
   minors: any[] = [];
-  
+
   // Modal
   showCreateForm = false;
   newTask: TaskCreateDTO = {
@@ -51,6 +52,12 @@ export class Tasks implements OnInit {
   pageSize = 10;
   totalPages = 1;
 
+  isRejectModalOpen = false;
+  rejectTaskId: number | null = null;
+  rejectTaskTitle: string = '';
+  rejectReason: string = '';
+
+
   ngOnInit(): void {
     if (!isPlatformBrowser(this.platformId)) {
       return;
@@ -65,6 +72,25 @@ export class Tasks implements OnInit {
     if (this.userRole === 'MONITOR') {
       this.loadMinors();
     }
+  }
+
+  showErrorMessage(message: string): void {
+    this.error = message;
+
+    if (this.errorTimeout) {
+      clearTimeout(this.errorTimeout);
+    }
+
+    this.errorTimeout = setTimeout(() => {
+      this.error = null;
+    }, 4000); // Some sozinho após 4 segundos
+  }
+
+  dismissError(): void {
+    if (this.errorTimeout) {
+      clearTimeout(this.errorTimeout);
+    }
+    this.error = null;
   }
 
   loadMinors() {
@@ -93,12 +119,12 @@ export class Tasks implements OnInit {
         return;
       }
       this.taskService.getFamilyTasks(this.familyId, this.currentPage, this.pageSize).subscribe({
-        next: (data: any) => { 
-          this.tasks = Array.isArray(data) ? data : (data?.content || []); 
+        next: (data: any) => {
+          this.tasks = Array.isArray(data) ? data : (data?.content || []);
           this.totalPages = data?.totalPages || 1;
           this.currentPage = data?.number || 0;
-          this.loading = false; 
-          this.cdr.detectChanges(); 
+          this.loading = false;
+          this.cdr.detectChanges();
         },
         error: (err) => { console.error('Erro ao carregar tarefas da família:', err); this.error = 'Erro ao carregar tarefas da família.'; this.loading = false; this.cdr.detectChanges(); }
       });
@@ -192,53 +218,67 @@ export class Tasks implements OnInit {
     });
   }
 
-  approveTask(id: number) {
+  approveTask(taskId: number): void {
     this.loading = true;
-    this.error = null;
-    this.successMsg = null;
-
-    this.taskService.approveTask(id).subscribe({
+    this.taskService.approveTask(taskId).subscribe({
       next: () => {
         this.successMsg = 'Tarefa aprovada com sucesso!';
+
+        // 1. Atualiza o status diretamente no item da lista para refletir na tela na hora:
+        const task = this.tasks.find(t => t.id === taskId);
+        if (task) {
+          task.status = 'APROVADA'; // ou 'APPROVED', conforme seu enum de retorno
+        }
+
         this.loadTasks();
-        setTimeout(() => {
-          this.successMsg = null;
-          this.cdr.detectChanges();
-        }, 2000);
-      },
-      error: (err) => {
-        console.error('Erro ao aprovar tarefa:', err);
-        this.error = extractErrorMessage(err, 'Erro ao aprovar tarefa. Tente novamente.');
+
         this.loading = false;
-        this.cdr.detectChanges();
+      },
+      error: (err: any) => {
+        this.loading = false;
+        this.error = err.error?.message || 'Erro ao aprovar a tarefa.';
       }
     });
   }
 
-  rejectTask(id: number) {
-    const reason = prompt('Qual o motivo da reprovação da tarefa?');
-    
-    // Cancela a ação se o usuário clicar em Cancelar ou deixar em branco
-    if (!reason || reason.trim() === '') return; 
+  openRejectModal(task: any): void {
+    this.rejectTaskId = task.id;
+    this.rejectTaskTitle = task.title;
+    this.rejectReason = '';
+    this.isRejectModalOpen = true;
+  }
+
+  closeRejectModal(): void {
+    this.isRejectModalOpen = false;
+    this.rejectTaskId = null;
+    this.rejectReason = '';
+  }
+
+  confirmReject(): void {
+    if (!this.rejectTaskId) return;
+
+    const reason = this.rejectReason.trim();
+    if (!reason) {
+      this.error = 'Por favor, informe o motivo da revisão.';
+      return;
+    }
 
     this.loading = true;
-    this.error = null;
-    this.successMsg = null;
-
-    this.taskService.rejectTask(id, reason).subscribe({
+    this.taskService.rejectTask(this.rejectTaskId, reason).subscribe({
       next: () => {
-        this.successMsg = 'Tarefa rejeitada com sucesso!';
-        this.loadTasks();
-        setTimeout(() => {
-          this.successMsg = null;
-          this.cdr.detectChanges();
-        }, 2000);
-      },
-      error: (err) => {
-        console.error('Erro ao rejeitar tarefa:', err);
-        this.error = extractErrorMessage(err, 'Erro ao rejeitar tarefa. Tente novamente.');
+        this.successMsg = 'Tarefa devolvida para revisão com sucesso!';
+        // Atualiza o status da tarefa diretamente na lista da tabela
+        const foundTask = this.tasks.find(t => t.id === this.rejectTaskId);
+        if (foundTask) {
+          foundTask.status = 'REJEITADA';
+        }
+        this.closeRejectModal();
         this.loading = false;
-        this.cdr.detectChanges();
+      },
+      error: (err: any) => {
+        this.loading = false;
+        this.error = err.error?.message || 'Erro ao rejeitar a tarefa.';
+        this.closeRejectModal();
       }
     });
   }
@@ -258,11 +298,10 @@ export class Tasks implements OnInit {
             this.cdr.detectChanges();
           }, 2000);
         },
-        error: (err) => {
-          console.error('Erro ao remover tarefa:', err);
-          this.error = extractErrorMessage(err, 'Erro ao remover tarefa. Tente novamente.');
+        error: (err: any) => {
           this.loading = false;
-          this.cdr.detectChanges();
+          const msg = err.error?.message || 'Erro ao excluir a tarefa.';
+          this.showErrorMessage(msg);
         }
       });
     }

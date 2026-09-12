@@ -56,7 +56,7 @@ $card-border: #E2E8F0;
       margin: 0 0 1rem;
 
       .highlight-yellow {
-        color: #eab308;
+        color: #FFE600;
       }
     }
 
@@ -118,7 +118,6 @@ $card-border: #E2E8F0;
       display: block;
     }
 
-    // No mobile pequeno, os badges são ocultados para manter o foco limpo na ilustração
     .badge {
       display: none;
     }
@@ -223,7 +222,7 @@ $card-border: #E2E8F0;
       border-radius: 16px;
       border: 1px solid $card-border;
       display: flex;
-      flex-direction: column-reverse; // No mobile a ilustração fica no topo ou adaptada
+      flex-direction: column-reverse;
       align-items: center;
       gap: 1.25rem;
 
@@ -265,7 +264,7 @@ $card-border: #E2E8F0;
               font-weight: bold;
               font-size: 0.85rem;
 
-              &.check-yellow { color: #eab308; }
+              &.check-yellow { color: #F59E0B; }
               &.check-blue { color: #0284c7; }
             }
           }
@@ -330,7 +329,9 @@ $card-border: #E2E8F0;
   }
 }
 
-// 5. Sobre o Projeto (Mobile)
+// ==========================================
+// 5. SOBRE O PROJETO (O SISTEMA EM AÇÃO)
+// ==========================================
 .action-section {
   background-color: #ffffff;
   border-top: 1px solid #F1F5F9;
@@ -374,226 +375,463 @@ $card-border: #E2E8F0;
     }
   }
 
+  // Grid de Telas / Mocks Mobile
   .system-screens-grid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 1.25rem;
-    text-align: left;
+    gap: 1.5rem;
+    align-items: stretch;
 
-    .ui-mock-card {
-      background: #FAFAFA;
-      border: 1px solid #E2E8F0;
-      border-radius: 12px;
-      padding: 1rem;
-      font-size: 0.78rem;
+    // ESTRUTURA DO CELULAR (Phone Mockup)
+    .phone-mock-card {
+      background: #F8FAFC;
+      border: 1.5px solid #E2E8F0;
+      border-radius: 20px;
+      overflow: hidden;
       display: flex;
       flex-direction: column;
-      gap: 0.75rem;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      min-height: 380px;
 
-      .ui-mock-header {
+      &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 16px 30px -8px rgba(0, 0, 0, 0.08);
+      }
+
+      .phone-header {
+        background: #ffffff;
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid #E2E8F0;
         display: flex;
         justify-content: space-between;
-        font-weight: 700;
-        font-size: 0.82rem;
-        border-bottom: 1px solid #EDF2F7;
-        padding-bottom: 0.4rem;
+        align-items: center;
 
-        .close-x {
-          color: $text-muted;
-          font-size: 1rem;
+        .phone-title {
+          font-weight: 800;
+          font-size: 0.82rem;
+          color: #1E293B;
+        }
+
+        .close-btn {
+          color: #94A3B8;
+          font-size: 1.1rem;
           line-height: 1;
         }
       }
 
-      .ui-tabs-fake {
+      .mini-tabs {
         display: flex;
-        gap: 0.5rem;
-        font-size: 0.75rem;
+        background: #F1F5F9;
         border-bottom: 1px solid #E2E8F0;
-        padding-bottom: 0.3rem;
+        padding: 0.25rem 0.5rem 0;
+        gap: 0.35rem;
 
         span {
-          color: $text-muted;
-          padding: 0.2rem 0.4rem;
+          font-size: 0.65rem;
+          color: #64748B;
+          font-weight: 600;
+          padding: 0.35rem 0.4rem;
+          border-bottom: 2px solid transparent;
 
-          &.tab-active {
-            color: $blue-secondary;
-            font-weight: 700;
-            border-bottom: 2px solid $yellow-primary;
+          &.active {
+            color: #1E293B;
+            font-weight: 800;
+            border-bottom-color: $yellow-primary;
           }
         }
       }
 
-      .ui-mock-body {
+      .mini-alert-banner {
+        background: #DCFCE7;
+        color: #15803D;
+        border: 1px solid #BBF7D0;
+        padding: 0.4rem 0.6rem;
+        font-size: 0.65rem;
+        font-weight: 700;
+        line-height: 1.3;
+        margin: 0.6rem 0.6rem 0;
+        border-radius: 6px;
+      }
+
+      .phone-body {
+        padding: 0.75rem;
         display: flex;
         flex-direction: column;
-        gap: 0.5rem;
+        gap: 0.65rem;
+        flex: 1;
+
+        &.form-body {
+          background: #ffffff;
+          justify-content: space-between;
+        }
+
+        &.list-body {
+          gap: 0.6rem;
+        }
+
+        &.dash-body {
+          gap: 0.6rem;
+        }
+      }
+
+      // Estilos de Formulário (Mocks 1 e 4)
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+        text-align: left;
 
         label {
-          font-size: 0.7rem;
-          color: $text-muted;
+          font-size: 0.65rem;
+          font-weight: 600;
+          color: #64748B;
         }
 
-        h4 {
-          margin: 0;
-          font-size: 0.85rem;
-          font-weight: 700;
-        }
-
-        .input-fake, .textarea-fake {
-          background: #fff;
-          border: 1px solid #E2E8F0;
-          padding: 0.4rem 0.6rem;
+        .fake-input, .fake-select, .fake-textarea {
+          background: #F8FAFC;
+          border: 1px solid #CBD5E1;
           border-radius: 6px;
-          color: #334155;
-        }
-
-        .textarea-fake {
-          min-height: 40px;
+          padding: 0.35rem 0.55rem;
           font-size: 0.72rem;
+          color: #1E293B;
         }
 
-        .row-fake {
+        .fake-textarea {
+          min-height: 38px;
+          line-height: 1.3;
+        }
+      }
+
+      .btn-primary-mock {
+        width: 100%;
+        background-color: $yellow-primary;
+        color: $blue-secondary;
+        border: none;
+        padding: 0.5rem;
+        border-radius: 6px;
+        font-weight: 800;
+        font-size: 0.75rem;
+        cursor: default;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      }
+
+      // Estilos de Tarefas (Mocks 2 e 3)
+      .task-mini-card {
+        background: #ffffff;
+        border: 1px solid #E2E8F0;
+        border-radius: 10px;
+        padding: 0.65rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        text-align: left;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+
+        .task-top {
           display: flex;
           justify-content: space-between;
           align-items: center;
 
-          &.detail-row {
-            margin: 0.3rem 0;
+          .status-pill {
+            font-size: 0.6rem;
+            font-weight: 800;
+            padding: 0.15rem 0.45rem;
+            border-radius: 12px;
+
+            &.pending { background: #FEF3C7; color: #D97706; }
+            &.completed { background: #E0F2FE; color: #0284C7; }
+            &.approved { background: #DCFCE7; color: #16A34A; }
+          }
+
+          .reward {
+            font-size: 0.68rem;
+            font-weight: 700;
+            color: #1E293B;
           }
         }
 
-        .select-fake {
-          background: #fff;
-          border: 1px solid #E2E8F0;
-          padding: 0.4rem 0.7rem;
-          border-radius: 4px;
+        .task-name {
+          font-size: 0.8rem;
+          font-weight: 800;
+          color: #1E293B;
+          margin-top: 0.15rem;
         }
 
-        .btn-fake-action {
+        .task-desc {
+          margin: 0;
+          font-size: 0.68rem;
+          color: #64748B;
+        }
+
+        .btn-action-task {
           background: $yellow-primary;
           border: none;
-          padding: 0.45rem;
+          color: #1E293B;
+          padding: 0.4rem;
           border-radius: 6px;
-          font-weight: 700;
-          font-size: 0.75rem;
-          margin-top: 0.5rem;
+          font-size: 0.7rem;
+          font-weight: 800;
+          margin-top: 0.35rem;
           cursor: default;
         }
 
-        .task-item-fake {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          background: #fff;
-          padding: 0.5rem;
-          border-radius: 6px;
-          border: 1px solid #E2E8F0;
-
-          strong {
-            display: block;
-            font-size: 0.75rem;
-          }
-
-          small {
-            font-size: 0.68rem;
-            color: $text-muted;
-          }
-
-          .checkbox-fake {
-            width: 14px;
-            height: 14px;
-            border: 1px solid #CBD5E1;
-            border-radius: 3px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.65rem;
-
-            &.checked {
-              background: #22C55E;
-              border-color: #22C55E;
-              color: #fff;
-            }
-          }
-        }
-
-        .status-block {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin: 0.3rem 0;
-
-          .tag-pendente {
-            background: #FEF3C7;
-            color: #D97706;
-            padding: 0.15rem 0.4rem;
-            border-radius: 4px;
-            font-size: 0.68rem;
-            font-weight: 600;
-          }
-        }
-
-        .status-note {
-          font-size: 0.7rem;
-          color: $text-muted;
-          margin: 0;
-        }
-
-        .btn-group-decision {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 0.4rem;
-
-          .btn-decide {
-            text-align: center;
-            padding: 0.3rem;
-            border-radius: 4px;
-            font-size: 0.72rem;
-            font-weight: 600;
-
-            &.approve {
-              background: #DCFCE7;
-              color: #16A34A;
-            }
-
-            &.reject {
-              background: #FEE2E2;
-              color: #DC2626;
-            }
-          }
-        }
-
-        .wallet-balance-box {
-          background: #FEF9C3;
-          padding: 0.75rem;
-          border-radius: 8px;
+        .task-feedback {
+          font-size: 0.68rem;
+          font-weight: 700;
           text-align: center;
-          margin-bottom: 0.5rem;
+          padding-top: 0.35rem;
+          border-top: 1px solid #F1F5F9;
 
-          small {
-            color: #854D0E;
-            font-size: 0.7rem;
+          &.approved { color: #16A34A; }
+          &.waiting { color: #0284C7; }
+        }
+      }
+
+      // Mock 4: Aprovação do Monitor (Visual Fiel à Tela Real)
+      &.mock-4 {
+        .monitor-body {
+          display: flex;
+          flex-direction: column;
+          gap: 0.75rem;
+          padding: 0.75rem;
+        }
+
+        .monitor-top-area {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 0.4rem;
+          text-align: center;
+
+          .btn-fake-family {
+            background-color: $yellow-primary;
+            color: $blue-secondary;
+            padding: 0.3rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.68rem;
+            font-weight: 800;
           }
 
-          .stars-val {
-            font-size: 1.3rem;
-            font-weight: 800;
-            color: $blue-secondary;
-            margin-top: 0.2rem;
+          .monitor-sub {
+            margin: 0;
+            font-size: 0.65rem;
+            color: #475569;
+            font-weight: 600;
           }
         }
 
-        .wallet-action-row {
-          background: #fff;
-          border: 1px solid #E2E8F0;
-          padding: 0.4rem 0.6rem;
-          border-radius: 6px;
-          font-size: 0.72rem;
+        .monitor-task-card {
+          background: #ffffff;
+          border: 1px solid #e2e8f0;
+          border-left: 3.5px solid #ff9800;
+          border-radius: 8px;
+          padding: 0.65rem;
           display: flex;
-          align-items: center;
-          gap: 0.4rem;
+          flex-direction: column;
+          gap: 0.3rem;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+          text-align: left;
+
+          .card-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 0.4rem;
+
+            .task-title {
+              font-size: 0.82rem;
+              font-weight: 800;
+              color: #1e293b;
+            }
+
+            .minor-pill {
+              background-color: #fff3e0;
+              color: #e65100;
+              font-size: 0.6rem;
+              font-weight: 700;
+              padding: 0.15rem 0.45rem;
+              border-radius: 4px;
+              white-space: nowrap;
+            }
+          }
+
+          .task-desc {
+            margin: 0 0 0.4rem;
+            font-size: 0.68rem;
+            color: #64748b;
+          }
+
+          .card-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #f1f5f9;
+            padding-top: 0.45rem;
+            gap: 0.3rem;
+
+            .tokens-info {
+              font-size: 0.62rem;
+              color: #64748b;
+
+              strong {
+                color: #ff9800;
+                font-weight: 800;
+              }
+            }
+
+            .actions-group {
+              display: flex;
+              gap: 4px;
+
+              .btn-action-mock {
+                font-size: 0.6rem;
+                font-weight: 700;
+                padding: 0.25rem 0.45rem;
+                border-radius: 4px;
+                color: #ffffff;
+
+                &.approve {
+                  background-color: #4caf50;
+                }
+
+                &.reject {
+                  background-color: #f44336;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      // Mock 5: Dashboard Específico
+      .dash-hero-widget {
+        background: linear-gradient(135deg, #7C3AED 0%, #4F46E5 100%);
+        color: #ffffff;
+        border-radius: 12px;
+        padding: 0.65rem;
+        display: flex;
+        gap: 0.6rem;
+        align-items: center;
+        text-align: left;
+
+        .level-box {
+          background: rgba(255, 255, 255, 0.2);
+          border: 1px solid rgba(255, 255, 255, 0.4);
+          border-radius: 8px;
+          padding: 0.35rem 0.55rem;
+          text-align: center;
+          min-width: 44px;
+
+          small {
+            font-size: 0.55rem;
+            font-weight: 800;
+            display: block;
+          }
+          strong {
+            font-size: 1.3rem;
+            font-weight: 900;
+            line-height: 1;
+          }
+        }
+
+        .level-meta {
+          flex: 1;
+          min-width: 0;
+
+          .level-title-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.65rem;
+            font-weight: 700;
+            margin-bottom: 0.2rem;
+          }
+
+          .track {
+            height: 4px;
+            background: rgba(255, 255, 255, 0.25);
+            border-radius: 4px;
+            overflow: hidden;
+
+            .fill {
+              height: 100%;
+              background: #FACC15;
+            }
+          }
+
+          p {
+            margin: 0.3rem 0 0;
+            font-size: 0.58rem;
+            font-style: italic;
+            opacity: 0.9;
+            line-height: 1.25;
+          }
+        }
+      }
+
+      .dash-box {
+        background: #ffffff;
+        border: 1px solid #E2E8F0;
+        border-radius: 10px;
+        padding: 0.55rem 0.65rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        text-align: left;
+
+        .box-title {
+          font-size: 0.68rem;
+          font-weight: 800;
+          color: #1E293B;
+        }
+
+        .dual-row {
+          display: flex;
+          justify-content: space-between;
+          text-align: center;
+          margin: 0.15rem 0;
+
+          small {
+            display: block;
+            font-size: 0.6rem;
+            color: #64748B;
+          }
+          strong {
+            font-size: 1rem;
+            font-weight: 800;
+            color: #0F172A;
+
+            &.highlight-blue { color: #2563EB; }
+          }
+          span {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #475569;
+          }
+        }
+
+        .badge-yield {
+          color: #059669;
+          font-size: 0.62rem;
+          font-weight: 700;
+          text-align: center;
+        }
+
+        .time-track {
+          height: 4px;
+          background: #E2E8F0;
+          border-radius: 4px;
+          overflow: hidden;
+
+          .time-fill {
+            height: 100%;
+            background: #3B82F6;
+          }
+        }
+
+        .footnote {
+          font-size: 0.58rem;
+          color: #64748B;
         }
       }
     }
@@ -655,7 +893,6 @@ $card-border: #E2E8F0;
     padding: 0 1.5rem;
   }
 
-  // Ativação do Hero Layout em Grid e exibição dos Badges
   .hero-section {
     padding: 3rem 0;
     display: flex;
@@ -694,10 +931,9 @@ $card-border: #E2E8F0;
       max-width: 720px;
 
       .family-illustration {
-        max-height: 600px;
+        max-height: 400px;
       }
 
-      // Reativação dos Badges com as medidas refinadas
       .badge {
         display: flex;
         position: absolute;
@@ -740,13 +976,13 @@ $card-border: #E2E8F0;
         }
 
         &.badge-missoes {
-          top: 15%;
+          top: 10%;
           left: 4%;
         }
 
         &.badge-fichas {
           top: 55%;
-          left: 2%;
+          left: 1%;
         }
 
         &.badge-tela {
@@ -762,7 +998,6 @@ $card-border: #E2E8F0;
     }
   }
 
-  // Grids em 4 e 5 colunas no Desktop
   .flow-section .steps-grid {
     grid-template-columns: repeat(4, 1fr);
   }
@@ -775,8 +1010,10 @@ $card-border: #E2E8F0;
     .action-timeline {
       grid-template-columns: repeat(5, 1fr);
     }
+    // No desktop, cada cartão recebe largura proporcional com respiro e alinhamento
     .system-screens-grid {
       grid-template-columns: repeat(5, 1fr);
+      gap: 1rem;
     }
   }
 }

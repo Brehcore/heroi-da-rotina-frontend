@@ -1,6 +1,21 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MinorPortalService, TaskResponseDTO } from '../../minor-portal.service';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { AuthService } from '../../../../core/services/auth.service';
+import { Schemas } from '../../../../core/types/api.types';
+import { environment } from '../../../../../environments/environment';
+
+export type TaskResponseDTO = Schemas['TaskResponseDTO'];
+
+export interface Page<T> {
+  content: T[];
+  totalElements: number;
+  totalPages: number;
+  size: number;
+  number: number;
+  first: boolean;
+  last: boolean;
+}
 
 @Component({
   selector: 'app-minor-tasks',
@@ -10,76 +25,93 @@ import { MinorPortalService, TaskResponseDTO } from '../../minor-portal.service'
   styleUrls: ['./minor-tasks.scss']
 })
 export class MinorTasks implements OnInit {
-  private minorPortalService = inject(MinorPortalService);
+  private readonly http = inject(HttpClient);
+  private readonly authService = inject(AuthService);
+  private readonly cdr = inject(ChangeDetectorRef);
+  private readonly apiUrl = `${environment.apiUrl}/api/tasks`;
 
-  tasks: TaskResponseDTO[] = [];
+  tasksPage = signal<Page<TaskResponseDTO> | null>(null);
+  allLoadedTasks: TaskResponseDTO[] = [];
   filteredTasks: TaskResponseDTO[] = [];
-  selectedFilter: 'ALL' | 'PENDING' | 'COMPLETED' | 'APPROVED' = 'ALL';
 
-  loading = false;
-  actionLoadingId: number | null = null;
+  loading = true;
   error: string | null = null;
   successMsg: string | null = null;
+  actionLoadingId: number | null = null;
+
+  selectedFilter: string = 'ALL';
+  currentPage: number = 0;
+  readonly pageSize: number = 6;
 
   ngOnInit(): void {
     this.loadTasks();
   }
 
   loadTasks(): void {
-    const minorId = Number(sessionStorage.getItem('userId') || localStorage.getItem('userId'));
-    if (!minorId) return;
+    const minorId = this.authService.getCurrentUserId();
+    if (!minorId) {
+      this.error = 'Sessão expirada. Faça login novamente.';
+      this.loading = false;
+      return;
+    }
 
     this.loading = true;
     this.error = null;
 
-    this.minorPortalService.listAllTasksForMinor(minorId).subscribe({
-      next: (data) => {
-        this.tasks = data;
+    const params = new HttpParams()
+      .set('page', this.currentPage.toString())
+      .set('size', this.pageSize.toString())
+      .set('sort', 'creationDate,desc');
+
+    this.http.get<Page<TaskResponseDTO>>(`${this.apiUrl}/minor/${minorId}`, { params }).subscribe({
+      next: (page) => {
+        this.tasksPage.set(page);
+        this.allLoadedTasks = page.content || [];
         this.applyFilter(this.selectedFilter);
         this.loading = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
-        console.error('Erro ao carregar tarefas:', err);
-        this.error = 'Não foi possível carregar as tarefas.';
+        console.error('Erro ao carregar tarefas do menor:', err);
+        this.error = 'Não foi possível carregar as tarefas no momento.';
         this.loading = false;
+        this.cdr.detectChanges();
       }
     });
   }
 
-  applyFilter(filter: 'ALL' | 'PENDING' | 'COMPLETED' | 'APPROVED'): void {
+  applyFilter(filter: string): void {
     this.selectedFilter = filter;
-
-    switch (filter) {
-      case 'PENDING':
-        this.filteredTasks = this.tasks.filter(t => t.status === 'PENDING');
-        break;
-      case 'COMPLETED':
-        this.filteredTasks = this.tasks.filter(t => t.status === 'COMPLETED');
-        break;
-      case 'APPROVED':
-        this.filteredTasks = this.tasks.filter(t => t.status === 'APPROVED');
-        break;
-      default:
-        this.filteredTasks = [...this.tasks];
+    if (filter === 'ALL') {
+      this.filteredTasks = [...this.allLoadedTasks];
+    } else {
+      this.filteredTasks = this.allLoadedTasks.filter((t) => t.status === filter);
     }
+  }
+
+  goToPage(page: number): void {
+    const pageData = this.tasksPage();
+    if (!pageData || page < 0 || page >= pageData.totalPages) return;
+    this.currentPage = page;
+    this.loadTasks();
   }
 
   onConcludeTask(task: TaskResponseDTO): void {
     if (!task.id) return;
     this.actionLoadingId = task.id;
     this.error = null;
+    this.successMsg = null;
 
-    this.minorPortalService.completeTask(task.id).subscribe({
+    this.http.patch<TaskResponseDTO>(`${this.apiUrl}/${task.id}/conclude`, {}).subscribe({
       next: () => {
-        this.successMsg = `Tarefa "${task.title}" marcada como concluída!`;
         this.actionLoadingId = null;
+        this.successMsg = `Tarefa "${task.title}" enviada para aprovação do responsável!`;
         this.loadTasks();
-        setTimeout(() => this.successMsg = null, 4000);
       },
       error: (err) => {
-        console.error('Erro ao concluir tarefa:', err);
-        this.error = 'Erro ao concluir tarefa. Tente novamente.';
         this.actionLoadingId = null;
+        this.error = err.error?.message || 'Erro ao concluir tarefa. Tente novamente.';
+        this.cdr.detectChanges();
       }
     });
   }

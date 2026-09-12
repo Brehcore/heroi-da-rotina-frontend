@@ -56,7 +56,7 @@
   border-radius: 16px;
   padding: 1.5rem;
   display: flex;
-  gap: 1.5rem;
+  gap: 1.25rem;
   align-items: center;
   box-shadow: 0 10px 15px -3px rgba(124, 58, 237, 0.25);
 
@@ -66,12 +66,13 @@
     backdrop-filter: blur(8px);
     border: 2px solid rgba(255, 255, 255, 0.4);
     border-radius: 16px;
-    padding: 0.8rem 1.2rem;
+    padding: 0.8rem 1rem;
     text-align: center;
-    min-width: 80px;
+    min-width: 75px;
+    flex-shrink: 0;
 
     .level-tag {
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       letter-spacing: 0.05em;
       opacity: 0.9;
       display: block;
@@ -79,37 +80,47 @@
     }
 
     .level-number {
-      font-size: 2.2rem;
+      font-size: 2rem;
       font-weight: 800;
       line-height: 1;
+      margin-top: 0.2rem;
     }
   }
 
   .hero-info {
     flex: 1;
+    min-width: 0; // Previne quebras do flexbox em telas pequenas
 
     .xp-header {
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: baseline;
+      gap: 0.5rem;
       margin-bottom: 0.5rem;
       font-weight: 600;
 
       .rank-title {
-        font-size: 1.1rem;
+        font-size: 1.05rem;
+        font-weight: 700;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
       .xp-values {
-        font-size: 0.9rem;
+        font-size: 0.85rem;
         opacity: 0.9;
+        white-space: nowrap;
+        flex-shrink: 0;
       }
     }
 
     .motivational-phrase {
       margin-top: 0.6rem;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       opacity: 0.95;
       font-style: italic;
+      line-height: 1.35;
     }
   }
 }
@@ -117,7 +128,7 @@
 /* Barras de Progresso */
 .progress-bar-track {
   width: 100%;
-  height: 10px;
+  height: 8px;
   background-color: rgba(255, 255, 255, 0.25);
   border-radius: 999px;
   overflow: hidden;
@@ -189,6 +200,7 @@
       .value {
         font-size: 1.6rem;
         color: #0f172a;
+        font-weight: 800;
       }
     }
   }
@@ -371,5 +383,46 @@
 
   p {
     margin: 0;
+  }
+}
+
+/* AJUSTES RESPONSIVOS MOBILE */
+@media (max-width: 860px) {
+  .dashboard-container {
+    padding-bottom: 5.5rem; // Espaço para a barra inferior fixa
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-card {
+    padding: 1rem;
+    gap: 0.85rem;
+
+    .hero-badge {
+      min-width: 65px;
+      padding: 0.6rem 0.6rem;
+
+      .level-tag {
+        font-size: 0.65rem;
+      }
+      .level-number {
+        font-size: 1.6rem;
+      }
+    }
+
+    .hero-info {
+      .xp-header {
+        .rank-title {
+          font-size: 0.9rem;
+        }
+        .xp-values {
+          font-size: 0.75rem;
+        }
+      }
+      .motivational-phrase {
+        font-size: 0.75rem;
+        margin-top: 0.4rem;
+      }
+    }
   }
 }

@@ -23,12 +23,7 @@
 
   <!-- 2. Corpo do Portal: Sidebar + Área Central Dinâmica -->
   <div class="portal-body">
-    <app-minor-sidebar
-      [level]="dashboardData?.profile?.level || 1"
-      [currentXp]="dashboardData?.profile?.currentXp || 0"
-      [targetXp]="dashboardData?.profile?.targetXp || 100"
-      [dailyQuote]="dashboardData?.dailyQuote!"
-    ></app-minor-sidebar>
+    <app-minor-sidebar></app-minor-sidebar>
 
     <!-- Aqui o Angular renderiza a tela conforme a rota clicada -->
     <main class="portal-content-area">

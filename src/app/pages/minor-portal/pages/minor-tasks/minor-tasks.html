@@ -6,10 +6,10 @@
     </div>
 
     <div class="filter-tabs">
-      <button [class.active]="selectedFilter === 'ALL'" (click)="applyFilter('ALL')">Todas</button>
-      <button [class.active]="selectedFilter === 'PENDING'" (click)="applyFilter('PENDING')">Pendentes</button>
-      <button [class.active]="selectedFilter === 'COMPLETED'" (click)="applyFilter('COMPLETED')">Concluídas</button>
-      <button [class.active]="selectedFilter === 'APPROVED'" (click)="applyFilter('APPROVED')">Aprovadas</button>
+      <button type="button" [class.active]="selectedFilter === 'ALL'" (click)="applyFilter('ALL')">Todas</button>
+      <button type="button" [class.active]="selectedFilter === 'PENDING'" (click)="applyFilter('PENDING')">Pendentes</button>
+      <button type="button" [class.active]="selectedFilter === 'COMPLETED'" (click)="applyFilter('COMPLETED')">Concluídas</button>
+      <button type="button" [class.active]="selectedFilter === 'APPROVED'" (click)="applyFilter('APPROVED')">Aprovadas</button>
     </div>
   </header>
 
@@ -22,6 +22,7 @@
 
   @if (loading) {
     <div class="state-container">
+      <div class="spinner"></div>
       <p>Carregando tarefas...</p>
     </div>
   } @else if (filteredTasks.length === 0) {
@@ -36,7 +37,7 @@
         <article class="task-card">
           <div class="card-header">
             <span class="status-pill" [attr.data-status]="task.status">
-              {{ task.status }}
+              {{ task.status === 'APPROVED' ? 'Aprovada' : (task.status === 'COMPLETED' ? 'Concluída' : (task.status === 'REJECTED' ? 'Rejeitada' : 'Pendente')) }}
             </span>
             <div class="reward-tag">
               <span class="star">⭐</span> {{ task.rewardTask }} fichas
@@ -55,20 +56,49 @@
           <div class="card-action">
             @if (task.status === 'PENDING') {
               <button 
+                type="button"
                 class="btn-complete" 
                 (click)="onConcludeTask(task)"
                 [disabled]="actionLoadingId === task.id"
               >
-                {{ actionLoadingId === task.id ? 'Salvando...' : 'Concluir' }}
+                {{ actionLoadingId === task.id ? 'Salvando...' : 'Concluir Missão' }}
               </button>
             } @else if (task.status === 'COMPLETED') {
-              <span class="feedback waiting">Aguardando aprovação</span>
+              <span class="feedback waiting">⏳ Aguardando aprovação</span>
             } @else if (task.status === 'APPROVED') {
-              <span class="feedback approved">Aprovada e creditada</span>
+              <span class="feedback approved">✅ Aprovada e creditada</span>
+            } @else if (task.status === 'REJECTED') {
+              <span class="feedback rejected">❌ Necessita revisão</span>
             }
           </div>
         </article>
       }
     </div>
+
+    <!-- Paginação Rodapé -->
+    @if (tasksPage() && tasksPage()!.totalPages > 1) {
+      <div class="pagination-footer">
+        <span class="pagination-info">
+          Página {{ tasksPage()!.number + 1 }} de {{ tasksPage()!.totalPages }} ({{ tasksPage()!.totalElements }} registros)
+        </span>
+        <div class="pagination-buttons">
+          <button 
+            type="button" 
+            class="page-btn" 
+            [disabled]="tasksPage()!.first" 
+            (click)="goToPage(currentPage - 1)">
+            Anterior
+          </button>
+          <span class="page-current">{{ tasksPage()!.number + 1 }}</span>
+          <button 
+            type="button" 
+            class="page-btn" 
+            [disabled]="tasksPage()!.last" 
+            (click)="goToPage(currentPage + 1)">
+            Próxima
+          </button>
+        </div>
+      </div>
+    }
   }
 </div>
